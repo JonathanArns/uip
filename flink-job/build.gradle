@@ -19,7 +19,7 @@ plugins {
 group = 'main'
 version = '0'
 mainClassName = 'main.StreamingJob'
-description = """Flink Quickstart Job"""
+description = """Flink Example Job"""
 
 ext {
     javaVersion = '1.8'
@@ -33,7 +33,7 @@ ext {
 sourceCompatibility = javaVersion
 targetCompatibility = javaVersion
 tasks.withType(JavaCompile) {
-	options.encoding = 'UTF-8'
+    options.encoding = 'UTF-8'
 }
 
 applicationDefaultJvmArgs = ["-Dlog4j.configuration=log4j.properties"]
@@ -84,11 +84,8 @@ dependencies {
     flinkShadowJar group: 'org.apache.flink', name: "flink-connector-kafka_${scalaBinaryVersion}", version: "${flinkVersion}"
     // https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind
     flinkShadowJar group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.10.0'
-
-    // https://mvnrepository.com/artifact/org.jpmml/pmml-evaluator
-    flinkShadowJar group: 'org.jpmml', name: 'pmml-evaluator', version: '1.4.13'
-    // https://mvnrepository.com/artifact/org.jpmml/pmml-evaluator-extension
-    flinkShadowJar group: 'org.jpmml', name: 'pmml-evaluator-extension', version: '1.4.13'
+    // https://mvnrepository.com/artifact/commons-codec/commons-codec
+    flinkShadowJar group: 'commons-codec', name: 'commons-codec', version: '1.13'
 
 
 
