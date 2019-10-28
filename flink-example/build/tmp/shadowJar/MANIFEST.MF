@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Built-By: jonathan
+Build-Jdk: 11.0.4
+Main-Class: main.StreamingJob
+
