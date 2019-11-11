@@ -84,8 +84,12 @@ dependencies {
     flinkShadowJar group: 'org.apache.flink', name: "flink-connector-kafka_${scalaBinaryVersion}", version: "${flinkVersion}"
     // https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind
     flinkShadowJar group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.10.0'
-    // https://mvnrepository.com/artifact/commons-codec/commons-codec
-    flinkShadowJar group: 'commons-codec', name: 'commons-codec', version: '1.13'
+
+    // https://mvnrepository.com/artifact/org.jpmml/pmml-evaluator-extension
+    flinkShadowJar group: 'org.jpmml', name: 'pmml-evaluator', version: '1.4.13'
+    // https://mvnrepository.com/artifact/org.jpmml/pmml-evaluator-extension
+    flinkShadowJar group: 'org.jpmml', name: 'pmml-evaluator-extension', version: '1.4.13'
+
 
 
 
