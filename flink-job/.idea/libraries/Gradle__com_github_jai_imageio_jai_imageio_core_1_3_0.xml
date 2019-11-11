@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: com.github.jai-imageio:jai-imageio-core:1.3.0">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.github.jai-imageio/jai-imageio-core/1.3.0/268feccd3a0fe32058ede66db41a21d9c7a9e535/jai-imageio-core-1.3.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.github.jai-imageio/jai-imageio-core/1.3.0/38c73e1f0420a2c290ecff951e8a73945d22ccdd/jai-imageio-core-1.3.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

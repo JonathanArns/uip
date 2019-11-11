@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: org.bytedeco:opencv-platform:4.1.0-1.5.1">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.bytedeco/opencv-platform/4.1.0-1.5.1/2da9380d09d5e47958c7585adc751134960dfa51/opencv-platform-4.1.0-1.5.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.bytedeco/opencv-platform/4.1.0-1.5.1/6319e4e09d6593524dfa9c02f1c68cde87e45e76/opencv-platform-4.1.0-1.5.1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
