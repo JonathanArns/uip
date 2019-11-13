@@ -35,4 +35,9 @@ public class LSTM implements Serializable {
         return invers_pred;
     }
 
+    public double[] predict(double[] input) {
+        //TODO
+        return null;
+    }
+
 }

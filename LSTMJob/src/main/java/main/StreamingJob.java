@@ -18,32 +18,29 @@ package main;
  */
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.apache.flink.api.common.functions.AggregateFunction;
+import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.common.functions.MapFunction;
-import org.apache.flink.api.common.functions.ReduceFunction;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.api.java.functions.KeySelector;
-import org.apache.flink.api.java.tuple.Tuple2;
-import org.apache.flink.api.java.tuple.Tuple5;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.AssignerWithPunctuatedWatermarks;
 import org.apache.flink.streaming.api.watermark.Watermark;
-import org.apache.flink.streaming.api.windowing.assigners.SlidingEventTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.streaming.connectors.kafka.internals.KeyedSerializationSchemaWrapper;
 import org.apache.flink.types.Row;
 
-import java.time.*;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
-import java.util.*;
+import java.util.Properties;
 
 /**
  * Flink Streaming Job to generate primary keys for json messages in kafka
@@ -91,15 +88,17 @@ public class StreamingJob {
 				.window(new TumblingEventTimeMonthWindows())
 				.aggregate(new MonthAggregator(datePattern));
 
+		// Window and aggregate 12 months as input for the LSTM model
 		DataStream<Row> modelInput = months
 				.countWindowAll(12, 1)
-				.aggregate(new InputAggregator(datePattern));
+				.aggregate(new InputAggregator(datePattern))
+				.filter((FilterFunction<Row>) row -> row.getArity() == 12 && row.getField(11) != null);
 
 		DataStream<String> outputStream = modelInput
 				.map((MapFunction<Row, String>) row -> {
-					String result = "";
+					String result = "\n\n";
 					for(int i=0; i<12; i++) {
-						result += (String)row.getField(i);
+						result += " "+row.getField(i);
 					}
 					return result;
 				});
@@ -119,8 +118,7 @@ public class StreamingJob {
 
 	private static class TimestampAndWatermarkAssigner implements AssignerWithPunctuatedWatermarks<ObjectNode> {
 
-		public TimestampAndWatermarkAssigner() {
-		}
+		public TimestampAndWatermarkAssigner() {}
 
 		@Override
 		public long extractTimestamp(ObjectNode element, long previousElementTimestamp) {
