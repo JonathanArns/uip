@@ -37,10 +37,15 @@ public class InputAggregator implements AggregateFunction<Row, LinkedHashMap<Loc
         ArrayList<LocalDate> dates = new ArrayList<>();
         dates.addAll(tmp);
         dates.sort(LocalDate::compareTo);
-        Row row = new Row(12);
-        for (int i = 0; i < dates.size(); i++)
-            row.setField(i, accumulator.get(dates.get(dates.size()-(i+1))));
-        return row;
+        Row row;
+        Row result = new Row(6);
+        for(int j = 0; j < dates.size() && j < 6; j++) {
+            row = new Row(12);
+            for (int i = 0+j; i < dates.size() && i < 12+j; i++)
+                row.setField(i-j, accumulator.get(dates.get(dates.size() - (i + 1))));
+            result.setField(j, row);
+        }
+        return result;
     }
 
     @Override

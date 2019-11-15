@@ -90,9 +90,23 @@ public class StreamingJob {
 
 		// Window and aggregate 12 months as input for the LSTM model
 		DataStream<Row> modelInput = months
-				.countWindowAll(12, 1)
+				.countWindowAll(17, 1)
 				.aggregate(new InputAggregator(datePattern))
-				.filter((FilterFunction<Row>) row -> row.getArity() == 12 && row.getField(11) != null);
+				.filter((FilterFunction<Row>) row -> row.getArity() == 6 && row.getField(5) != null
+						&& ((Row)row.getField(5)).getArity() == 12 &&((Row)row.getField(5)).getField(11) != null)
+				// LSTM prediction
+				.map(new MapFunction<Row, Row>() {
+
+					@Override
+					public Row map(Row value) throws Exception {
+						double[][] input = new double[6][12];
+						for(int i=0; i<6; i++)
+							for(int j=0; j<12; j++)
+							input[i][j] = (Double)((Row)value.getField(i)).getField(j);
+						//TODO model call
+						return value;
+					}
+				});
 
 		DataStream<String> outputStream = modelInput
 				.map((MapFunction<Row, String>) row -> {

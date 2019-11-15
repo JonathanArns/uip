@@ -91,9 +91,14 @@ dependencies {
     flinkShadowJar group: 'org.jpmml', name: 'pmml-evaluator-extension', version: '1.4.13'
 
     // Keras LSTM model imports
-    flinkShadowJar group: 'org.deeplearning4j', name: 'deeplearning4j-core', version: '1.0.0-beta5'
-    flinkShadowJar group: 'org.deeplearning4j', name: 'deeplearning4j-modelimport', version: '1.0.0-beta5'
-    flinkShadowJar group: 'org.nd4j', name: 'nd4j-native-platform', version: '1.0.0-beta5'
+//    flinkShadowJar group: 'org.deeplearning4j', name: 'deeplearning4j-core', version: '1.0.0-beta5'
+//    flinkShadowJar group: 'org.deeplearning4j', name: 'deeplearning4j-modelimport', version: '1.0.0-beta5'
+//    flinkShadowJar group: 'org.nd4j', name: 'nd4j-native-platform', version: '1.0.0-beta5'
+
+    // Java Emebedded Python
+    // https://mvnrepository.com/artifact/black.ninia/jep
+    flinkShadowJar group: 'black.ninia', name: 'jep', version: '3.9.0'
+
 
 
 
