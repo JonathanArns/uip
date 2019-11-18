@@ -5,9 +5,6 @@ import jep.*;
 public class JEPModel {
     public static void main(String[] args) {
         try(Interpreter interpreter = new SharedInterpreter()) {
-//            SharedInterpreter.setConfig(new JepConfig().addSharedModules("numpy", "keras", "tensorflow"));
-
-//            System.out.println(interpreter.getValue("help('modules')"));
             interpreter.exec("import numpy as np");
             interpreter.exec("import keras");
             interpreter.exec("model = keras.models.load_model('/home/jonathan/workspaces/uip_workspace/uip-flink-jobs/LSTMJob/src/main/resources/my_model.h5')");
