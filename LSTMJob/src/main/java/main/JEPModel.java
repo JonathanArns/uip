@@ -7,7 +7,10 @@ public class JEPModel {
         try(Interpreter interpreter = new SharedInterpreter()) {
             interpreter.exec("import numpy as np");
             interpreter.exec("import keras");
-            interpreter.exec("model = keras.models.load_model('/home/jonathan/workspaces/uip_workspace/uip-flink-jobs/LSTMJob/src/main/resources/my_model.h5')");
+            interpreter.exec("from sklearn.externals import joblib");
+            interpreter.exec("scaler = joblib.load('src/main/resources/scaler_lstm.save')");
+            interpreter.exec("features = scaler.transform(x)");
+            interpreter.exec("model = keras.models.load_model('src/main/resources/my_model.h5')");
             interpreter.exec("x = np.array([[[1]]])");
             Object result = interpreter.getValue("model.predict(x)");
             System.out.println(result);
