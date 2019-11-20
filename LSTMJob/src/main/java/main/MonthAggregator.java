@@ -1,11 +1,9 @@
 package main;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.flink.api.common.functions.AggregateFunction;
 import org.apache.flink.api.java.tuple.Tuple2;
-import org.apache.flink.types.Row;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -20,7 +18,7 @@ import java.util.HashMap;
  * The accumulator is used to keep a running sum and a count. The {@code getResult} method
  * computes the average.
  */
-public class MonthAggregator implements AggregateFunction<ObjectNode, Tuple2<Double, ArrayList<Long>>, Row> {
+public class MonthAggregator implements AggregateFunction<ObjectNode, Tuple2<Double, ArrayList<Long>>, Tuple2<String, Double>> {
     private static ObjectMapper objectMapper = new ObjectMapper();
     private static DateTimeFormatter dateTimeFormatter;
 
@@ -43,7 +41,7 @@ public class MonthAggregator implements AggregateFunction<ObjectNode, Tuple2<Dou
     }
 
     @Override
-    public Row getResult(Tuple2<Double, ArrayList<Long>> accumulator) {
+    public Tuple2<String, Double> getResult(Tuple2<Double, ArrayList<Long>> accumulator) {
         // Count the dates and use most common, to eliminate early or late elements' dates
         HashMap<Long, Integer> counts = new HashMap<>();
         accumulator.f1.forEach(timestamp -> {
@@ -64,22 +62,7 @@ public class MonthAggregator implements AggregateFunction<ObjectNode, Tuple2<Dou
         LocalDateTime dateTime = instant.atZone(ZoneId.systemDefault()).toLocalDateTime();
         String date = dateTime.format(dateTimeFormatter).substring(0, 8) + "01";
 
-        // Build the Json object to return
-        ObjectNode result = objectMapper.createObjectNode();
-        ObjectNode schema = objectMapper.createObjectNode();
-        ObjectNode payload = objectMapper.createObjectNode();
-        ArrayNode fieldSchemas = schema.put("type", "struct").putArray("fields");
-        ObjectNode dateSchema = objectMapper.createObjectNode().put("field", "Order Date").put("type", "string").put("optional", "false");
-        ObjectNode salesSchema = objectMapper.createObjectNode().put("field", "Sales").put("type", "int64").put("optional", "false");;
-        fieldSchemas.add(dateSchema).add(salesSchema);
-        payload.put("Order Date", date)
-                .put("Sales", accumulator.f0);
-        result.set("schema", schema);
-        result.set("payload", payload);
-        Row row = new Row(2);
-        row.setField(0, date);
-        row.setField(1, accumulator.f0);
-        return row;
+        return new Tuple2<String, Double>(date, accumulator.f0);
     }
 
     @Override
