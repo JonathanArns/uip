@@ -26,8 +26,11 @@ import java.time.temporal.TemporalAccessor;
 import java.util.*;
 
 /**
- * Flink Streaming Job to generate primary keys for json messages in kafka
+ * Flink Streaming Job to collect the data necessary to build the features of the LSTM sales prediction model.
  *
+ * This Job aggregates sliding windows of 17 months of data and writes these windows back to kafka
+ * in json format like:
+ * {data: [{"date":"2014-01-01","sales":3278.23}, {"date":"2014-02-01","sales":57322.432}, ... ]}
  */
 public class StreamingJob {
 	private static String datePattern = "yyyy-MM-dd";
@@ -59,11 +62,9 @@ public class StreamingJob {
 		//add the consumer to the environment as a data-source, to get a DataStream
 		DataStream<String> dataStream = environment.addSource(flinkKafkaConsumer);
 
-		// parse and add timestamps
+		// parse json and assign a flink event-time timestamp to each element
 		DataStream<ObjectNode> timestampedStream = dataStream
-				// parse the json string
 				.map((MapFunction<String, ObjectNode>) value -> (ObjectNode) objectMapper.readTree(value))
-				// Assign a flink timestamp to each event
 				.assignTimestampsAndWatermarks(new TimestampAndWatermarkAssigner());
 
 		// Window and aggregate to months
@@ -72,12 +73,13 @@ public class StreamingJob {
 				.window(new TumblingEventTimeMonthWindows())
 				.aggregate(new MonthAggregator(datePattern));
 
-		// Window and aggregate 17 months as input for the LSTM model
+		// Window and aggregate 17 months as json input for the LSTM model
 		DataStream<ObjectNode> featureStream = months
 				.countWindowAll(17, 1)
 				.aggregate(new FeatureAggregator(datePattern))
 				.filter((FilterFunction<ObjectNode>) value -> value != null);
 
+		// transform json objects to String to write to kafka
 		DataStream<String> outputStream = featureStream
 				.map(value -> objectMapper.writeValueAsString(value));
 

@@ -5,15 +5,17 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.flink.api.common.functions.AggregateFunction;
 import org.apache.flink.api.java.tuple.Tuple2;
-import org.apache.flink.types.Row;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
 
 /**
- * The accumulator is used to keep a running sum and a count. The {@code getResult} method
- * computes the average.
+ * A window aggregator class that is used to collect the data necessary to build the features
+ * of the LSTM Sales prediction model.
+ *
+ * The result is json in the format:
+ * {data: [{"date":"2014-01-01","sales":3278.23}, {"date":"2014-02-01","sales":57322.432}, ... ]}
  */
 public class FeatureAggregator implements AggregateFunction<Tuple2<String, Double>, LinkedHashMap<LocalDate, Double>, ObjectNode> {
     private static DateTimeFormatter dateTimeFormatter;
@@ -35,15 +37,6 @@ public class FeatureAggregator implements AggregateFunction<Tuple2<String, Doubl
 
     @Override
     public ObjectNode getResult(LinkedHashMap<LocalDate, Double> accumulator) {
-//        Set<LocalDate> keySet = accumulator.keySet();
-//        ArrayList<LocalDate> dates = new ArrayList<>();
-//        dates.addAll(keySet);
-//        dates.sort(LocalDate::compareTo);
-//        System.out.println("Expected: dates from early to late"); //debuggin TODO remove
-//        String dateString = "";
-//        for(int i=0; i<dates.size(); i++)
-//            dateString += "\n"+dates.get(i).toString();
-//        System.out.println(dateString);
         if(accumulator.size() < 17)
             return null;
         ObjectMapper objectMapper = new ObjectMapper();
