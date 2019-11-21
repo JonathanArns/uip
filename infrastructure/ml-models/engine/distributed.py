@@ -60,5 +60,3 @@ def run():
     message_queue_actor = MessageQueueActor()
     write_results.remote(message_queue_actor)
     compute.remote(message_queue_actor)
-
-##TODO create consumer and poll periodically and compute for every input
