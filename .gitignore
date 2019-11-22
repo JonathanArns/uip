@@ -5,5 +5,5 @@
 
 **/.docker-volumes/postgres-data
 **/.DS_Store
-**/*.log
+**/logs
 **/*.pyc

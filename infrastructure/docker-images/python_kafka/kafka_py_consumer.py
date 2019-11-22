@@ -1,7 +1,18 @@
 from confluent_kafka import Consumer, KafkaError
+from termcolor import cprint as cp
 import sys
 
-def open_connection_to_broker(topic_name, bootstrap_server):
+def open_connection_to_broker(topic_name='aggregated_pipe', bootstrap_server='kafka:29092'):
+    """
+    function to open a connection to the kafka broker topic.
+    if no system arguments are given a connection to \'kafka:29092\' will be opened
+    and the consumer will read from the \'aggregated_pipe\' topic.
+    The script runs a while loop to keep the connection open and will read from the stream each every 0.5 seconds.
+
+    param:: topic_name:string, bootstrap_server:string
+    return:: -
+    raises:: KafkaError
+    """
     settings = {
         'bootstrap.servers': bootstrap_server,
         'group.id': 'test_group1',
@@ -27,12 +38,18 @@ def open_connection_to_broker(topic_name, bootstrap_server):
 
 
 if __name__ == '__main__':
-    topic_name = sys.argv[1]
-    bootstrap_server = sys.argv[2]
-
+    
     try:
-        open_connection_to_broker(topic_name, bootstrap_server)
+        if len(sys.argv) >= 1:
+            topic_name = sys.argv[1]
+            bootstrap_server = sys.argv[2]
+            open_connection_to_broker(
+                            topic_name=topic_name,
+                            bootstrap_server=bootstrap_server)
+        else:
+            open_connection_to_broker() #opens connection with default topic and default bootstrap server
     except KafkaError as kafka_error:
-        print(str(kafka_error))
-    finally:
-        pass
+        print(cp(f'log[ERROR]: {kafka_error}'))
+        
+        
+    
