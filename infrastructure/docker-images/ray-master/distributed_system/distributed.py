@@ -1,4 +1,5 @@
 import ray
+import json
 from consumer_producer import KafkaConsumer, KafkaProducer
 from time import sleep
 
@@ -53,7 +54,8 @@ class ModelActor():
 
     def predict(self, features):
         prediction = self.model.predict(features, batch_size=1)
-        self.message_queue.push.remote(prediction)
+        for msg in prediction:
+            self.message_queue.push.remote(json.dumps(msg))
 
 def run(model, input_topic, output_topic, bootstrap_server):
     ray.init()

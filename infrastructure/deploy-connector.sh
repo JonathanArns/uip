@@ -1,5 +1,5 @@
 curl -X POST http://localhost:8083/connectors -H "Content-Type: application/json" -d '{
-        "name": "postgres-sink",
+        "name": "postgres-data-sink",
         "config": {
                 "tasks.max": "1",
                 "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
@@ -15,6 +15,26 @@ curl -X POST http://localhost:8083/connectors -H "Content-Type: application/json
                 "pk.fields": "postgres_pk",
                 "insert.mode": "upsert",
                 "topics.regex": ".*?persist"
+                }
+        }'
+
+curl -X POST http://localhost:8083/connectors -H "Content-Type: application/json" -d '{
+        "name": "postgres-result-sink",
+        "config": {
+                "tasks.max": "1",
+                "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+                "connection.url": "jdbc:postgresql://postgres:5432/kafka_connect",
+                "connection.user": "kafka_connect",
+                "connection.password": "kafka_connect",
+                "auto.create": "true",
+                "auto.evolve": "true",
+                "errors.tolerance": "all",
+                "errors.deadletterqueue.topic.name": "jdbc_deadletterqueue",
+                "errors.deadletterqueue.topic.replication.factor": "1",
+                "pk.mode": "record_value",
+                "pk.fields": "date",
+                "insert.mode": "upsert",
+                "topics.regex": ".*?results"
                 }
         }'
 
