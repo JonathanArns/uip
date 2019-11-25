@@ -6,4 +6,4 @@ COPY requirements.txt ./
 RUN pip install -r requirements.txt
 
 COPY kafka_py_consumer.py ./
-CMD [ "python3", "-u" ,"./kafka_py_consumer.py", "output_topic", "kafka:29092" ]
+CMD [ "python3", "-u" ,"./kafka_py_consumer.py", "input_topic", "output_topic","kafka:29092" ]
