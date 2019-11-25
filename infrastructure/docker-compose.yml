@@ -108,11 +108,20 @@ services:
     environment:
      - JOB_MANAGER_RPC_ADDRESS=jobmanager
 
-  kafka-python:
-    build: ./docker-images/python_kafka 
-    container_name: kafka-python
+  ray-master:
+    build: ./docker-images/ray-master
+    container_name: ray-master
+    expose: 
+      - 3301
     depends_on:
       - kafka
+    
+  ray-worker_1:
+    build: ./docker-images/ray-worker
+    container_name: ray-worker
+    depends_on:
+      - kafka
+      - ray-master
 
   prometheus:
     image: prom/prometheus:latest
