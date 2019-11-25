@@ -19,11 +19,11 @@ import java.util.HashMap;
  * computes the average.
  */
 public class MonthAggregator implements AggregateFunction<ObjectNode, Tuple2<Double, ArrayList<Long>>, Tuple2<String, Double>> {
-    private static ObjectMapper objectMapper = new ObjectMapper();
-    private static DateTimeFormatter dateTimeFormatter;
+    private DateTimeFormatter dateTimeFormatter = null;
+    private String datePattern;
 
     public MonthAggregator(String datePattern) {
-        dateTimeFormatter = DateTimeFormatter.ofPattern(datePattern);
+        this.datePattern = datePattern;
     }
 
     @Override
@@ -62,7 +62,7 @@ public class MonthAggregator implements AggregateFunction<ObjectNode, Tuple2<Dou
         LocalDateTime dateTime = instant.atZone(ZoneId.systemDefault()).toLocalDateTime();
         String date = dateTime.format(dateTimeFormatter).substring(0, 8) + "01";
 
-        return new Tuple2<String, Double>(date, accumulator.f0);
+        return new Tuple2<>(date, accumulator.f0);
     }
 
     @Override
@@ -72,7 +72,19 @@ public class MonthAggregator implements AggregateFunction<ObjectNode, Tuple2<Dou
     }
 
     private long getTimestamp(ObjectNode element) {
-        TemporalAccessor temporalAccessor = dateTimeFormatter.parse(element.get("payload").get("Order Date").asText());
+        if(dateTimeFormatter == null)
+            dateTimeFormatter = DateTimeFormatter.ofPattern(datePattern);
+
+        String dateString = element.get("payload").get("Order Date").asText();
+
+
+        if(dateTimeFormatter == null)
+            throw new RuntimeException("dateTimeFormatter not initialized");
+        else if(dateString == null)
+            throw new RuntimeException("Order date is null");
+
+
+        TemporalAccessor temporalAccessor = dateTimeFormatter.parse(dateString);
         LocalDate localDate = LocalDate.from(temporalAccessor);
         Instant instant = localDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
         return instant.toEpochMilli();

@@ -18,10 +18,11 @@ import java.util.LinkedHashMap;
  * {data: [{"date":"2014-01-01","sales":3278.23}, {"date":"2014-02-01","sales":57322.432}, ... ]}
  */
 public class FeatureAggregator implements AggregateFunction<Tuple2<String, Double>, LinkedHashMap<LocalDate, Double>, ObjectNode> {
-    private static DateTimeFormatter dateTimeFormatter;
+    private DateTimeFormatter dateTimeFormatter = null;
+    private String datePattern;
 
     public FeatureAggregator(String datePattern) {
-        dateTimeFormatter = DateTimeFormatter.ofPattern(datePattern);
+        this.datePattern = datePattern;
     }
 
     @Override
@@ -31,6 +32,9 @@ public class FeatureAggregator implements AggregateFunction<Tuple2<String, Doubl
 
     @Override
     public LinkedHashMap<LocalDate, Double> add(Tuple2<String, Double> value, LinkedHashMap<LocalDate, Double> accumulator) {
+        if(dateTimeFormatter == null)
+            dateTimeFormatter = DateTimeFormatter.ofPattern(datePattern);
+
         accumulator.put(LocalDate.from(dateTimeFormatter.parse(value.f0)), value.f1);
         return accumulator;
     }

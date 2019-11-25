@@ -42,9 +42,9 @@ public class StreamingJob {
 
 		String jobName = parameterTool.get("job-name", "AggregationJob");
 		String inputTopic = parameterTool.get("input-topic", "transaction_data");
-		String outputTopic = parameterTool.get("output-topic", "lstm_features");
+		String outputTopic = parameterTool.get("output-topic", "test");
 		String consumerGroup = parameterTool.get("group-id", "Group");
-		String kafkaAddress = parameterTool.get("kafka-address", "localhost:9092"); // for running in eclipse use "localhost:9092", for flink cluster "kafka:29092"
+		String kafkaAddress = parameterTool.get("kafka-address", "kafka:29092"); // for running in eclipse use "localhost:9092", for flink cluster "kafka:29092"
 
 		ObjectMapper objectMapper = new ObjectMapper();
 
