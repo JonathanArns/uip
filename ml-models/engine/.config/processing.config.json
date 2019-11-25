@@ -1,0 +1,8 @@
+{
+    "lstm-script": {
+        "dataFrame-path": "/Users/konstantingasser/Desktop/ml-models/data/store.csv",
+        "group-by": "M",
+        "date-col": "Order Date",
+        "target-col": "Sales"
+    }
+}
