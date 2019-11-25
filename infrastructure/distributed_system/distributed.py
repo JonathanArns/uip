@@ -5,23 +5,22 @@ from time import sleep
 @ray.remote
 def write_results(message_queue_actor):
     """create producer and poll the MessageQueueActor periodically for new messages"""
-    producer = # TODO: create kafka producer
+    producer = None # TODO: create kafka producer
  
     while True:
         while ray.get(message_queue_actor.hasNext.remote()):
-            # TODO: write ray.get(messageQueueActor.next.remote()) to topic
+            pass # TODO: write ray.get(messageQueueActor.next.remote()) to topic
         sleep(1)
 
 @ray.remote
 def compute(message_queue_actor):
-    """make the prediction and write the result to the message queue Actor"""
-    consumer = # TODO: create kafka consumer
+    """poll periodically, make a prediction and write the result to the message queue Actor"""
+    consumer = None # TODO: create kafka consumer
     models = []
     model_index = 0
     for _ in range(2):
         model = ModelActor(message_queue_actor)
         models.append(model)
-        model_queue.append(model)
 
     while True:
         msg = consumer.poll(1.0)
@@ -53,11 +52,12 @@ class ModelActor():
         self.message_queue = message_queue_actor
 
     def predict(self, features):
-        prediction = model.predict(features, batch_size=1)
-        # TODO: create json message
-        message_queue.push.remote(json)
+        prediction = self.model.predict(features, batch_size=1)
+        json = "" # TODO: create json message
+        self.message_queue.push.remote(json)
 
 def run():
+    ray.init()
     message_queue_actor = MessageQueueActor()
     write_results.remote(message_queue_actor)
     compute.remote(message_queue_actor)

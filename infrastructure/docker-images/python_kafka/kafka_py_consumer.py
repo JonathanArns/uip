@@ -1,7 +1,8 @@
 from confluent_kafka import Consumer, KafkaError
 from termcolor import cprint as cp
-import sys
-from distributed
+import sys, os
+sys.path.insert(1, os.path.join(sys.path[0], '../..'))
+from distributed_system import distributed
 
 
 
