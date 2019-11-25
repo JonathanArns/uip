@@ -1,8 +1,0 @@
-{
-    "lstm-script": {
-        "dataFrame-path": "infrastructure/ml-models/engine/data/store.csv",
-        "group-by": "M",
-        "date-col": "Order Date",
-        "target-col": "Sales"
-    }
-}
