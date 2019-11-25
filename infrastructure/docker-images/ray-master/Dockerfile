@@ -7,6 +7,6 @@ RUN pip install -r requirements.txt
 
 COPY kafka_py.py ./
 COPY distributed_system ./
+COPY init_ray.sh ./
 
-CMD ["ray", "start", "--head", "--redis-port=3301"]
-CMD ["python3", "-u" ,"./kafka_py.py", "input_topic", "lstm_prediction_results", "kafka:29092"]
+CMD ["bash", "init_ray.sh", "input_topic", "lstm_results", "kafka:29092"]
