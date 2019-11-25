@@ -1,7 +1,7 @@
 from confluent_kafka import Consumer, Producer, KafkaError
 
 
-class Consumer(Consumer):
+class KafkaConsumer(Consumer):
     """
     Class Consumer inherits from confluent_kafka.Consumer. As such it acts like the super class
     TODO: write docs for no super methods
@@ -39,7 +39,7 @@ class Consumer(Consumer):
 
     
 
-class Producer(Producer):
+class KafkaProducer(Producer):
     """
     Class Producer inherits from confluent_kafka.Producer. As such it acts like the super class
     TODO: write docs for no super methods

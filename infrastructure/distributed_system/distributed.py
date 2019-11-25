@@ -1,11 +1,11 @@
 import ray
-from confluent_kafka import Consumer, KafkaError
+from consumer_producer import KafkaConsumer, KafkaProducer
 from time import sleep
 
 @ray.remote
-def write_results(message_queue_actor):
+def write_results(message_queue_actor, output_topic, bootstrap_server):
     """create producer and poll the MessageQueueActor periodically for new messages"""
-    producer = None # TODO: create kafka producer
+    producer = KafkaProducer(output_topic, bootstrap_server) # TODO: create kafka producer
  
     while True:
         while ray.get(message_queue_actor.hasNext.remote()):
@@ -13,13 +13,13 @@ def write_results(message_queue_actor):
         sleep(1)
 
 @ray.remote
-def compute(message_queue_actor):
+def compute(message_queue_actor, model):
     """poll periodically, make a prediction and write the result to the message queue Actor"""
     consumer = None # TODO: create kafka consumer
     models = []
     model_index = 0
     for _ in range(2):
-        model = ModelActor(message_queue_actor)
+        model = ModelActor(message_queue_actor, model)
         models.append(model)
 
     while True:
@@ -46,18 +46,16 @@ class MessageQueueActor():
 
 @ray.remote
 class ModelActor():
-    def __init__(self, message_queue_actor):
-        import keras
-        self.model = keras.models.load_model('./model.h5')
+    def __init__(self, message_queue_actor, model):
+        self.model = model
         self.message_queue = message_queue_actor
 
     def predict(self, features):
         prediction = self.model.predict(features, batch_size=1)
-        json = "" # TODO: create json message
-        self.message_queue.push.remote(json)
+        self.message_queue.push.remote(prediction)
 
-def run():
+def run(model, input_topic, output_topic, bootstrap_server):
     ray.init()
     message_queue_actor = MessageQueueActor()
-    write_results.remote(message_queue_actor)
-    compute.remote(message_queue_actor)
+    write_results.remote(message_queue_actor, output_topic, bootstrap_server)
+    compute.remote(message_queue_actor, model)
