@@ -5,21 +5,22 @@ from time import sleep
 @ray.remote
 def write_results(message_queue_actor, output_topic, bootstrap_server):
     """create producer and poll the MessageQueueActor periodically for new messages"""
-    producer = KafkaProducer(output_topic, bootstrap_server) # TODO: create kafka producer
+    producer = KafkaProducer(output_topic, bootstrap_server)
  
     while True:
         while ray.get(message_queue_actor.hasNext.remote()):
-            pass # TODO: write ray.get(messageQueueActor.next.remote()) to topic
+            producer._write_to_topic(ray.get(message_queue_actor.next.remote()))
         sleep(1)
 
 @ray.remote
-def compute(message_queue_actor, model):
+def compute(message_queue_actor, model, input_topic, bootstrap_server):
     """poll periodically, make a prediction and write the result to the message queue Actor"""
-    consumer = None # TODO: create kafka consumer
+    consumer = KafkaConsumer(input_topic, bootstrap_server)
+    model_obj_id = ray.put(model)
     models = []
     model_index = 0
     for _ in range(2):
-        model = ModelActor(message_queue_actor, model)
+        model = ModelActor(message_queue_actor, model_obj_id)
         models.append(model)
 
     while True:
@@ -46,8 +47,8 @@ class MessageQueueActor():
 
 @ray.remote
 class ModelActor():
-    def __init__(self, message_queue_actor, model):
-        self.model = model
+    def __init__(self, message_queue_actor, model_obj_id):
+        self.model = ray.get(model_obj_id)
         self.message_queue = message_queue_actor
 
     def predict(self, features):
@@ -58,4 +59,4 @@ def run(model, input_topic, output_topic, bootstrap_server):
     ray.init()
     message_queue_actor = MessageQueueActor()
     write_results.remote(message_queue_actor, output_topic, bootstrap_server)
-    compute.remote(message_queue_actor, model)
+    compute.remote(message_queue_actor, model, input_topic, bootstrap_server)
