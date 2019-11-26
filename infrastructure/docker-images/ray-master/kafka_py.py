@@ -1,6 +1,5 @@
-from termcolor import cprint as cp
 import sys, os
-sys.path.insert(1, os.path.join(sys.path[0], '../..'))
+sys.path.append('/usr/src/app/')
 from distributed_system import distributed
 
 
@@ -14,6 +13,7 @@ def run(input_topic, output_topic, bootstrap_server):
     param:: input_topic:string, output_topic:string, bootstrap_server:string
     return:: -
     """
+    distributed.run(None, input_topic, output_topic, bootstrap_server)
     
 
 if __name__ == '__main__':

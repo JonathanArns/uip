@@ -6,7 +6,7 @@ COPY requirements.txt ./
 RUN pip install -r requirements.txt
 
 COPY kafka_py.py ./
-COPY distributed_system ./
+COPY distributed_system ./distributed_system
 COPY init_ray.sh ./
 
 CMD ["bash", "init_ray.sh", "input_topic", "lstm_results", "kafka:29092"]
