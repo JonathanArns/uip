@@ -18,6 +18,7 @@ def write_results(message_queue_actor, output_topic, bootstrap_server):
 def compute(message_queue_actor, model, input_topic, bootstrap_server):
     """poll periodically, make a prediction and write the result to the message queue Actor"""
     consumer = KafkaConsumer(input_topic, bootstrap_server)
+    print('After Instance')
     model_obj_id = ray.put(model)
     models = []
     model_index = 0
@@ -27,10 +28,12 @@ def compute(message_queue_actor, model, input_topic, bootstrap_server):
 
     while True:
         msg = consumer.poll(1.0)
+
         if(msg == None):
             sleep(1)
         else:
-            models[model_index].predict.remote(msg.value)
+            print(msg.value())
+            models[model_index].predict.remote(msg.value())
             model_index = (model_index + 1) % len(models)
 
 @ray.remote
@@ -51,11 +54,11 @@ class MessageQueueActor():
 class ModelActor():
     def __init__(self, message_queue_actor, model_obj_id):
         print(type(model_obj_id))
-        self.model = ray.get(model_obj_id)
+        self.model = model_obj_id
         self.message_queue = message_queue_actor
 
     def predict(self, features):
-        prediction = self.model.predict(features, batch_size=1)
+        prediction = self.model.predict(features)
         for msg in prediction:
             self.message_queue.push.remote(json.dumps(msg))
 
