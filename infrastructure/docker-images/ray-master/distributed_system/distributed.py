@@ -7,7 +7,7 @@ from time import sleep
 def write_results(message_queue_actor, output_topic, bootstrap_server):
     """create producer and poll the MessageQueueActor periodically for new messages"""
     producer = KafkaProducer(output_topic, bootstrap_server)
- 
+
     print('HALLO, ICH GEHE JETZT IN EINE ENDLOSSCHLEIFE')
     while True:
         while ray.get(message_queue_actor.hasNext.remote()):
@@ -50,6 +50,7 @@ class MessageQueueActor():
 @ray.remote
 class ModelActor():
     def __init__(self, message_queue_actor, model_obj_id):
+        print(type(model_obj_id))
         self.model = ray.get(model_obj_id)
         self.message_queue = message_queue_actor
 

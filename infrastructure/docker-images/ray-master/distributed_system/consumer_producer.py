@@ -8,23 +8,23 @@ class KafkaConsumer(Consumer):
     """
     def __init__(self, input_topic, bootstrap_server):
         self.topic = input_topic
-        self.bootstrap_server = bootstrap_server 
+        self.bootstrap_server = bootstrap_server
         super().__init__(self._create_settings())
         self.subscribe([input_topic])
-    
+
     def _create_settings(self):
         """
         creates settings required for the Producer
         return settings:dictonary{}
         """
-        return {	    
-            'bootstrap.servers': self.bootstrap_server,	
-            'group.id': 'test_group1',	
-            'default.topic.config': {	
-                    'auto.offset.reset': 'smallest'	
-                    }	
+        return {
+            'bootstrap.servers': self.bootstrap_server,
+            'group.id': 'test_group1',
+            'default.topic.config': {
+                    'auto.offset.reset': 'smallest'
+                    }
             }
-    
+
     def _poll_messages(self):
         """
         function which polls messages from the specified kafka topic and returns the message
@@ -37,7 +37,7 @@ class KafkaConsumer(Consumer):
         except KafkaError as consumer_poll_error:
             raise  consumer_poll_error
 
-    
+
 
 class KafkaProducer(Producer):
     """
@@ -55,9 +55,9 @@ class KafkaProducer(Producer):
         return settings:dictonary{}
         """
         return {
-                'bootstrap_server': self.bootstrap_server
+                'bootstrap.servers': self.bootstrap_server
             }
-    
+
     def _write_to_topic(self, data):
         """
         function to write to the kafka topic specified in the __init__()
