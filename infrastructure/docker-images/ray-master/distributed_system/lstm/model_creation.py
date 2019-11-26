@@ -34,7 +34,7 @@ class LSTM():
         raise:: KerasError
         """
         try:
-            return load_model('/usr/src/app/distributed_system/lstm/model_data/lstm-model.h5')
+            return load_model('docker-images/ray-master/distributed_system/lstm/model_data/lstm-model.h5')
         except Exception as keras_loader_error:
             raise keras_loader_error
 
@@ -46,7 +46,7 @@ class LSTM():
         raise:: sklearn.joblib.error
         """
         try:
-            return joblib.load('/usr/src/app/distributed_system/lstm/model_data/min-max-scaler.save')
+            return joblib.load('docker-images/ray-master/distributed_system/lstm/model_data/min-max-scaler.save')
         except Exception as joblib_loader_error:
             raise joblib_loader_error
 
@@ -57,7 +57,7 @@ class LSTM():
        
         try:
             y_data, self.start = self._decode_json_to_df(data)
-            y_scaled           = self._feature_scaling(self.scaler, data)
+            y_scaled           = self._feature_scaling(self.scaler, y_data)
             y_pred             = self.model.predict(y_scaled, batch_size=1)
             return self._encode_data_to_json(self.start, y_pred.flatten())
         except Exception as prediction_error:
@@ -116,10 +116,11 @@ class LSTM():
         """
         TODO: docs
         """
-        for inc in range(1,13):
+        for inc in range(1,11):
             field_name = 'lag_' + str(inc)
             df[field_name] = df['difference'].shift(inc)
-            df = df.dropna().reset_index(drop=True)
+        df = df.dropna().reset_index(drop=True)
+        print(f'shape after lags: {df.shape}')
         return df
 
     
@@ -127,16 +128,29 @@ class LSTM():
         """
         TODO: docs
         """
-        data['prev_sales'] = data['sales'].shitf(1)
+        print(type(data))
+        print(data.head())
+        print(data.shape)
+        data['sales']      = data['sales'].astype(float)
+        data['prev_sales'] = data['sales'].shift(1)
         data               = data.dropna()
         data['difference'] = (data['sales'] - data['prev_sales'])
-
-        lag_df             = _lag_creation(data)
+        data               = data.drop(['prev_sales'], axis=1).copy()
+        lag_df             = self._lag_creation(data)
+        print(lag_df.head())
+        print(lag_df.shape)
         lag_df             = lag_df.drop(['sales', 'date'], axis=1)
-        lag_df             = lag_df.reshape(lag_df[0], lag_df.shape[1])
-
-        y                  = scaler.transform(lag_df.values)
+        lag_df             = lag_df.values
+        
+        lag_df             = lag_df.reshape(lag_df.shape[0], lag_df.shape[1])
+        lag_df             = np.concatenate([lag_df, [[0],[0],[0],[0],[0],[0]]], axis=1)
+        print(lag_df.shape)
+        y                  = scaler.transform(lag_df)
+        y                  = np.delete(y, -1, axis=1)
         y                  = y.reshape(y.shape[0], 1, y.shape[1])
+
+        print(y)
+        print(y.shape)
         return y
 
     
@@ -146,3 +160,11 @@ class LSTM():
               create seperat scaler ONLY for predicted values!
         """
         pass
+
+
+
+
+lstm = LSTM()
+
+data = '{"data":[{"date":"2018-01-01","sales":100},{"date":"2018-01-01","sales":100},{"date":"2018-01-01","sales":100},{"date":"2018-01-01","sales":100},{"date":"2018-01-01","sales":100},{"date":"2018-01-01","sales":100},{"date":"2018-01-01","sales":100},{"date":"2018-01-01","sales":100},{"date":"2018-01-01","sales":100},{"date":"2018-01-01","sales":100},{"date":"2018-01-01","sales":100},{"date":"2018-01-01","sales":100},{"date":"2018-01-01","sales":100},{"date":"2018-01-01","sales":100},{"date":"2018-01-01","sales":100},{"date":"2018-01-01","sales":100},{"date":"2018-01-01","sales":100}]}'
+lstm.predict(data)
