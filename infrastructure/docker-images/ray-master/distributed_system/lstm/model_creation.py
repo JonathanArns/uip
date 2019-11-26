@@ -34,7 +34,7 @@ class LSTM():
         raise:: KerasError
         """
         try:
-            return load_model('infrastructure/docker-images/ray-master/distributed_system/lstm/model_data/lstm-model.h5')
+            return load_model('usr/src/app/distributed_system/lstm/model_data/lstm-model.h5')
         except Exception as keras_loader_error:
             raise keras_loader_error
 
@@ -46,7 +46,7 @@ class LSTM():
         raise:: sklearn.joblib.error
         """
         try:
-            return joblib.load('infrastructure/docker-images/ray-master/distributed_system/lstm/model_data/min-max-scaler.save')
+            return joblib.load('usr/src/app/distributed_system/lstm/model_data/min-max-scaler.save')
         except Exception as joblib_loader_error:
             raise joblib_loader_error
 
