@@ -234,13 +234,12 @@ def start_processor():
     # comupting the difference between sales and prev sales. Adding the lags to the data frame
     df_diff = df_lstm.copy()
     df_diff['prev_sales'] = df_diff['sales'].shift(1)
-    print(f'diff  {df_diff}')
     df_diff= df_diff.dropna()
-    print(f'diff drop {df_diff}')
+   
     df_diff['difference'] = _compute_diff_of_sales(df_diff['sales'], df_diff['prev_sales'])
-    print(f'diff shape {df_diff.shape}')
+
     df_supervised = df_diff.drop(['prev_sales'], axis=1).copy()
-    df_supervised = _create_lags_for_supervised(df_supervised, 13)
+    df_supervised = _create_lags_for_supervised(df_supervised, 12)
 
     df_features = df_supervised.drop(['sales', 'date'], axis=1)
     #############################################################
