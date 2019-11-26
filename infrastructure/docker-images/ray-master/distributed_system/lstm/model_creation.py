@@ -49,34 +49,6 @@ class LSTM():
             return joblib.load('./model_data/min-max-scaler.save')
         except Exception as joblib_loader_error:
             raise joblib_loader_error
-    
-    """
-    
-    "schema": {
-        "type": "struct",
-        "fields": [{
-            "type": "int32",
-            "optional": false,
-            "field": "id"
-        }, {
-            "type": "struct",
-            "name": "data",
-            "optional": false,
-            "fields": [{
-               "type": "string",
-               "name": "hello",
-               "optional":false
-            }]
-        }],
-        "optional": false,
-        "name": "foobar"
-    },
-    "payload": {
-        "id": 10000,
-        "data": {"hello":"world"}
-        }
-    }
-    """
 
     def predict(self, data):
         """

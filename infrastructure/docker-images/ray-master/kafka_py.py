@@ -13,7 +13,7 @@ def run(input_topic, output_topic, bootstrap_server, lstm_model):
     param:: input_topic:string, output_topic:string, bootstrap_server:string
     return:: -
     """
-    distributed.run(None, input_topic, output_topic, bootstrap_server)
+    distributed.run(lstm_model, input_topic, output_topic, bootstrap_server)
     
 
 if __name__ == '__main__':
