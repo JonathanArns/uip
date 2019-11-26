@@ -64,8 +64,6 @@ class ModelActor():
 
 def run(model, input_topic, output_topic, bootstrap_server):
     ray.init()
-    print('POS 1')
     message_queue_actor = MessageQueueActor.remote()
-    print('POS 2')
     write_results.remote(message_queue_actor, output_topic, bootstrap_server)
     compute(message_queue_actor, model, input_topic, bootstrap_server)
