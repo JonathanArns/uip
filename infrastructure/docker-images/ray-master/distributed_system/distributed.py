@@ -8,10 +8,11 @@ def write_results(message_queue_actor, output_topic, bootstrap_server):
     """create producer and poll the MessageQueueActor periodically for new messages"""
     producer = KafkaProducer(output_topic, bootstrap_server)
 
-    print('HALLO, ICH GEHE JETZT IN EINE ENDLOSSCHLEIFE')
     while True:
         while ray.get(message_queue_actor.hasNext.remote()):
-            producer._write_to_topic(ray.get(message_queue_actor.next.remote()))
+            data = ray.get(message_queue_actor.next.remote())
+            print(data)
+            producer._write_to_topic(data)
         sleep(1)
 
 
@@ -22,9 +23,9 @@ def compute(message_queue_actor, model, input_topic, bootstrap_server):
     model_obj_id = ray.put(model)
     models = []
     model_index = 0
-    for _ in range(2):
-        model = ModelActor.remote(message_queue_actor, model_obj_id)
-        models.append(model)
+    for _ in range(1):
+        modelActor = ModelActor.remote(message_queue_actor, model_obj_id)
+        models.append(modelActor)
 
     while True:
         msg = consumer.poll(1.0)
@@ -42,12 +43,15 @@ class MessageQueueActor():
         self.messages = []
 
     def push(self, message):
+        print('PUSH TO QUEUE')
         self.messages.append(message)
 
     def next(self):
+        print('in next')
         return self.messages.pop(0)
 
     def hasNext(self):
+        print('hasNext func')
         return len(self.messages) > 0
 
 @ray.remote
@@ -59,7 +63,10 @@ class ModelActor():
 
     def predict(self, features):
         prediction = self.model.predict(features)
+        print('------')
+        print(prediction)
         for msg in prediction:
+            print('PUSH IN MODEL')
             self.message_queue.push.remote(json.dumps(msg))
 
 def run(model, input_topic, output_topic, bootstrap_server):

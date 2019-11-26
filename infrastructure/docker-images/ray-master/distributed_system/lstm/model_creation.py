@@ -34,7 +34,7 @@ class LSTM():
         raise:: KerasError
         """
         try:
-            return load_model('docker-images/ray-master/distributed_system/lstm/model_data/lstm-model.h5')
+            return load_model('/usr/src/app/distributed_system/lstm/model_data/lstm-model.h5')
         except Exception as keras_loader_error:
             raise keras_loader_error
 
@@ -46,7 +46,7 @@ class LSTM():
         raise:: sklearn.joblib.error
         """
         try:
-            return joblib.load('docker-images/ray-master/distributed_system/lstm/model_data/min-max-scaler.save')
+            return joblib.load('/usr/src/app/distributed_system/lstm/model_data/min-max-scaler.save')
         except Exception as joblib_loader_error:
             raise joblib_loader_error
 
@@ -54,12 +54,15 @@ class LSTM():
         """
         TODO: docs
         """
-       
         try:
             y_data, self.start = self._decode_json_to_df(data)
             y_scaled           = self._feature_scaling(self.scaler, y_data)
             y_pred             = self.model.predict(y_scaled, batch_size=1)
-            return self._encode_data_to_json(self.start, y_pred.flatten())
+            print(y_pred.shape)
+            y_pred             = self._inverse_scaling(y_pred)
+            back = self._encode_data_to_json(self.start, y_pred)
+            
+            return back
         except Exception as prediction_error:
             raise prediction_error
 
@@ -154,17 +157,17 @@ class LSTM():
         return y
 
     
-    def inverse_scaling(self, scaler, y_pred):
+    def _inverse_scaling(self, y_pred):
         """
         TODO: docs
               create seperat scaler ONLY for predicted values!
         """
-        pass
-
-
-
-
-lstm = LSTM()
-
-data = '{"data":[{"date":"2018-01-01","sales":100},{"date":"2018-01-01","sales":100},{"date":"2018-01-01","sales":100},{"date":"2018-01-01","sales":100},{"date":"2018-01-01","sales":100},{"date":"2018-01-01","sales":100},{"date":"2018-01-01","sales":100},{"date":"2018-01-01","sales":100},{"date":"2018-01-01","sales":100},{"date":"2018-01-01","sales":100},{"date":"2018-01-01","sales":100},{"date":"2018-01-01","sales":100},{"date":"2018-01-01","sales":100},{"date":"2018-01-01","sales":100},{"date":"2018-01-01","sales":100},{"date":"2018-01-01","sales":100},{"date":"2018-01-01","sales":100}]}'
-lstm.predict(data)
+        tmp = []
+        for i in range(0,len(y_pred)):
+            tmp.append(
+                np.concatenate([[[0,0,0,0,0,0,0,0,0,0,0]], [y_pred[i]]], axis=1)
+            )
+        tmp = np.array(tmp)
+        tmp = tmp.reshape(tmp.shape[0], tmp.shape[2])
+        tmp = self.scaler.inverse_transform(tmp)
+        return tmp[:,-1]

@@ -66,14 +66,13 @@ class KafkaProducer(Producer):
         raises KafkaError if messages faild to publish to topic
         """
         try:
-            self.produce(self.topic, data.encode('utf-8'), callback=delivery_report)
+            self.produce(self.topic, data.encode('utf-8'))
         except KafkaError as producer_write_error:
             raise producer_write_error
         finally:
             self.flush()
 
-    @staticmethod
-    def delivery_report(err, msg):
+    def delivery_report(self, err, msg):
         """ Called once for each message produced to indicate delivery result.
         Triggered by poll() or flush(). """
         if err is not None:
