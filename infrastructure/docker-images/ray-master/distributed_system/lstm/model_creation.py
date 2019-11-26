@@ -22,7 +22,7 @@ from sklearn.externals import joblib
 class LSTM():
     def __init__(self):
         self.model  = self._load_model()
-        self.scaler = self.load_scaler()
+        self.scaler = self._load_scaler()
         self.start = None
     
 
@@ -34,7 +34,7 @@ class LSTM():
         raise:: KerasError
         """
         try:
-            return load_model('usr/src/app/distributed_system/lstm/model_data/lstm-model.h5')
+            return load_model('/usr/src/app/distributed_system/lstm/model_data/lstm-model.h5')
         except Exception as keras_loader_error:
             raise keras_loader_error
 
@@ -46,7 +46,7 @@ class LSTM():
         raise:: sklearn.joblib.error
         """
         try:
-            return joblib.load('usr/src/app/distributed_system/lstm/model_data/min-max-scaler.save')
+            return joblib.load('/usr/src/app/distributed_system/lstm/model_data/min-max-scaler.save')
         except Exception as joblib_loader_error:
             raise joblib_loader_error
 
@@ -54,20 +54,20 @@ class LSTM():
         """
         TODO: docs
         """
-        y_data = _feature_scaling(data)
+       
         try:
-            y_data, self.start = _decode_json_to_df(data)
-            y_scaled           = _feature_scaling(self.scaler, data)
+            y_data, self.start = self._decode_json_to_df(data)
+            y_scaled           = self._feature_scaling(self.scaler, data)
             y_pred             = self.model.predict(y_scaled, batch_size=1)
-            return _encode_data_to_json(self.start, y_pred.flatten())
+            return self._encode_data_to_json(self.start, y_pred.flatten())
         except Exception as prediction_error:
             raise prediction_error
 
     
 
 ##############TOOL-BOX-FUNCTIONS##############################################
-    @staticmethod
-    def _decode_json_to_df(data):
+    
+    def _decode_json_to_df(self, data):
         """
         in order to transform the json to a pandas Data Frame we need to load the json in a dictonary.
         param:: data:json
@@ -75,14 +75,13 @@ class LSTM():
         raise:: jsonLoadError, pandasDataFrameError
         """
         try:
-            data_ = json.load(data)
+            data_ = json.loads(data)
             return pd.DataFrame(data_['data']), data_['data'][0]['date']
         except Exception as parser_error:
             raise parser_error
     
 
-    @staticmethod
-    def _encode_data_to_json(start, data):
+    def _encode_data_to_json(self, start, data):
         """
         TODO: use date insted of ID
         """
@@ -113,8 +112,7 @@ class LSTM():
 
 
 
-    @staticmethod
-    def _lag_creation(df):
+    def _lag_creation(self, df):
         """
         TODO: docs
         """
@@ -124,8 +122,8 @@ class LSTM():
             df = df.dropna().reset_index(drop=True)
         return df
 
-    @staticmethod
-    def _feature_scaling(scaler, data):
+    
+    def _feature_scaling(self, scaler, data):
         """
         TODO: docs
         """
@@ -141,8 +139,8 @@ class LSTM():
         y                  = y.reshape(y.shape[0], 1, y.shape[1])
         return y
 
-    @staticmethod
-    def inverse_scaling(scaler, y_pred):
+    
+    def inverse_scaling(self, scaler, y_pred):
         """
         TODO: docs
               create seperat scaler ONLY for predicted values!
