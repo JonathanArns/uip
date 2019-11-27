@@ -20,6 +20,11 @@ from sklearn.externals import joblib
 
 
 class LSTM():
+    """
+    LSTM class if instanciated will be able to make predictions based on the model loaded.
+    From the instance one only has to call the predict(data) function.
+    The class will then take care of any scaling shaping and inverse scaling
+    """
     def __init__(self):
         self.model  = self._load_model()
         self.scaler = self._load_scaler()
@@ -52,7 +57,11 @@ class LSTM():
 
     def predict(self, data):
         """
-        TODO: docs
+        function gets a json string with the data
+        Json will be decoded, scaled and the run through the prediction.
+        The predictions will be stacked in a dictonary pleasing the needs kafka-connect wants a schema for writing in the db
+        param:: data:json
+        return:: inversed_pred: dictonary{}
         """
         try:
             y_data, self.start = self._decode_json_to_df(data)
@@ -86,7 +95,9 @@ class LSTM():
 
     def _encode_data_to_json(self, start, data):
         """
-        TODO: use date insted of ID
+        this dictonary structrue is required for kafka and kafka-connect in order to save the results in the db
+        param:: start:string, data:np.array
+        return:: payload:list[dict{}]
         """
         payload = []
         for i, field in enumerate(data):
@@ -117,7 +128,7 @@ class LSTM():
 
     def _lag_creation(self, df):
         """
-        TODO: docs
+        
         """
         for inc in range(1,11):
             field_name = 'lag_' + str(inc)
@@ -131,17 +142,13 @@ class LSTM():
         """
         TODO: docs
         """
-        print(type(data))
-        print(data.head())
-        print(data.shape)
         data['sales']      = data['sales'].astype(float)
         data['prev_sales'] = data['sales'].shift(1)
         data               = data.dropna()
         data['difference'] = (data['sales'] - data['prev_sales'])
         data               = data.drop(['prev_sales'], axis=1).copy()
         lag_df             = self._lag_creation(data)
-        print(lag_df.head())
-        print(lag_df.shape)
+        
         lag_df             = lag_df.drop(['sales', 'date'], axis=1)
         lag_df             = lag_df.values
         
@@ -152,15 +159,12 @@ class LSTM():
         y                  = np.delete(y, -1, axis=1)
         y                  = y.reshape(y.shape[0], 1, y.shape[1])
 
-        print(y)
-        print(y.shape)
         return y
 
     
     def _inverse_scaling(self, y_pred):
         """
         TODO: docs
-              create seperat scaler ONLY for predicted values!
         """
         tmp = []
         for i in range(0,len(y_pred)):
