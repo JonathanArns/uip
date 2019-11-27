@@ -26,7 +26,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-in", "--input", type=str, help="sets the input topic for kafka cunsumer")
     parser.add_argument("-out", "--output", type=str, help="sets the output topic for kafka producer")
-    parser.add_argument("-brokder", "--bootstrap", type=str, help="sets the bootstrap server of the broker to connect to")
+    parser.add_argument("-broker", "--bootstrap", type=str, help="sets the bootstrap server of the broker to connect to")
     args = parser.parse_args()
 
     lstm_model = LSTM()
