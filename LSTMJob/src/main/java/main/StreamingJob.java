@@ -33,20 +33,18 @@ import java.util.*;
  * {data: [{"date":"2014-01-01","sales":3278.23}, {"date":"2014-02-01","sales":57322.432}, ... ]}
  */
 public class StreamingJob {
-	private static String datePattern = "yyyy-MM-dd";
-	private static DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(datePattern);
-
 
 	public static void main(String[] args) throws Exception {
 		ParameterTool parameterTool = ParameterTool.fromArgs(args);
 
-		String jobName = parameterTool.get("job-name", "AggregationJob");
-		String inputTopic = parameterTool.get("input-topic", "transaction_data");
-		String outputTopic = parameterTool.get("output-topic", "test");
-		String consumerGroup = parameterTool.get("group-id", "Group");
-		String kafkaAddress = parameterTool.get("kafka-address", "kafka:29092"); // for running in eclipse use "localhost:9092", for flink cluster "kafka:29092"
+		final String jobName = parameterTool.get("job-name", "feature_aggregation_job");
+		final String inputTopic = parameterTool.get("input-topic", "transaction_data");
+		final String outputTopic = parameterTool.get("output-topic", "lstm_input");
+		final String consumerGroup = parameterTool.get("group-id", "lstm");
+		final String kafkaAddress = parameterTool.get("kafka-address", "localhost:9092"); // for running in eclipse use "localhost:9092", for flink cluster "kafka:29092"
 
-		ObjectMapper objectMapper = new ObjectMapper();
+		final String datePattern = "yyyy-MM-dd";
+		final ObjectMapper objectMapper = new ObjectMapper();
 
 		//get the execution environment
 		StreamExecutionEnvironment environment = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -65,7 +63,7 @@ public class StreamingJob {
 		// parse json and assign a flink event-time timestamp to each element
 		DataStream<ObjectNode> timestampedStream = dataStream
 				.map((MapFunction<String, ObjectNode>) value -> (ObjectNode) objectMapper.readTree(value))
-				.assignTimestampsAndWatermarks(new TimestampAndWatermarkAssigner());
+				.assignTimestampsAndWatermarks(new TimestampAndWatermarkAssigner(datePattern));
 
 		// Window and aggregate to months
 		DataStream<Tuple2<String, Double>> months = timestampedStream
@@ -97,11 +95,17 @@ public class StreamingJob {
 	}
 
 	private static class TimestampAndWatermarkAssigner implements AssignerWithPunctuatedWatermarks<ObjectNode> {
+		String datePattern;
+		DateTimeFormatter dateTimeFormatter = null;
 
-		public TimestampAndWatermarkAssigner() {}
+		public TimestampAndWatermarkAssigner(String datePattern) {
+			this.datePattern = datePattern;
+		}
 
 		@Override
 		public long extractTimestamp(ObjectNode element, long previousElementTimestamp) {
+			if(dateTimeFormatter == null)
+				dateTimeFormatter = DateTimeFormatter.ofPattern(datePattern);
 			TemporalAccessor temporalAccessor = dateTimeFormatter.parse(element.get("payload").get("Order Date").asText());
 			LocalDate localDate = LocalDate.from(temporalAccessor);
 			Instant instant = localDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
