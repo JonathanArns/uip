@@ -111,13 +111,13 @@ class LSTM():
                                 'field': "date"
                             },
                             {
-                                'type': "string",
+                                'type': "float64",
                                 'optional': False,
                                 'field': "date"
                             }],
                     'payload': {
                         'date': str(i),
-                        'sales': str(field)
+                        'sales': field
                         }
                     }
                 }
