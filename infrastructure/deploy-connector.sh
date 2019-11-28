@@ -34,7 +34,7 @@ curl -X POST http://localhost:8083/connectors -H "Content-Type: application/json
                 "pk.mode": "record_value",
                 "pk.fields": "date",
                 "insert.mode": "upsert",
-                "topics.regex": ".*?results"
+                "topics.regex": ".*?result.?"
                 }
         }'
 
