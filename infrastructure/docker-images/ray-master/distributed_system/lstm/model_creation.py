@@ -115,12 +115,14 @@ class LSTM():
                                 'optional': False,
                                 'field': "date"
                             }],
-                    'payload': {
-                        'date': str(i),
-                        'sales': str(field)
-                        }
-                    }
+                    'optional':False,
+                    'name':'com.github.jcustenborder.kafka.connect.model.Value'
+                },
+                'payload': {
+                    'date': str(i),
+                    'sales': str(field)
                 }
+            }
             payload.append(d)
         return payload
 
