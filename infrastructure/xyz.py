@@ -9,9 +9,11 @@ database = 'kafka_connect'
 def doQuery( conn ) :
     cur = conn.cursor()
 
-    cur.execute( "COPY lstm_results TO '/var/lib/postgresql/data/export.csv' DELIMITER ';' CSV HEADER;" )
+    return cur.execute( "Select * from 'lstm_results'" )
+
 
 import psycopg2
 myConnection = psycopg2.connect( host=hostname, user=username, password=password, dbname=database )
-doQuery( myConnection )
+df = pd.read_sql_query(doQuery( myConnection ))
+df.to_csv(r'Path where you want to store the exported CSV file\File Name.csv')
 myConnection.close()
