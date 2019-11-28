@@ -9,4 +9,4 @@ COPY kafka_py.py ./
 COPY distributed_system ./distributed_system
 COPY init_ray.sh ./
 
-CMD ["bash", "init_ray.sh", "input_topic", "lstm_results", "kafka:29092"]
+CMD ["bash", "init_ray.sh", "lstm_input", "lstm_results", "kafka:29092"]

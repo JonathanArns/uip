@@ -29,7 +29,7 @@ class LSTM():
         self.model  = self._load_model()
         self.scaler = self._load_scaler()
         self.start = None
-    
+
 
     def _load_model(self):
         """
@@ -70,15 +70,15 @@ class LSTM():
             print(y_pred.shape)
             y_pred             = self._inverse_scaling(y_pred)
             back = self._encode_data_to_json(self.start, y_pred)
-            
+
             return back
         except Exception as prediction_error:
             raise prediction_error
 
-    
+
 
 ##############TOOL-BOX-FUNCTIONS##############################################
-    
+
     def _decode_json_to_df(self, data):
         """
         in order to transform the json to a pandas Data Frame we need to load the json in a dictonary.
@@ -91,7 +91,7 @@ class LSTM():
             return pd.DataFrame(data_['data']), data_['data'][0]['date']
         except Exception as parser_error:
             raise parser_error
-    
+
 
     def _encode_data_to_json(self, start, data):
         """
@@ -111,7 +111,7 @@ class LSTM():
                                 'field': "date"
                             },
                             {
-                                'type': "string",
+                                'type': "float64",
                                 'optional': False,
                                 'field': "date"
                             }],
@@ -128,7 +128,7 @@ class LSTM():
 
     def _lag_creation(self, df):
         """
-        
+
         """
         for inc in range(1,11):
             field_name = 'lag_' + str(inc)
@@ -137,7 +137,7 @@ class LSTM():
         print(f'shape after lags: {df.shape}')
         return df
 
-    
+
     def _feature_scaling(self, scaler, data):
         """
         TODO: docs
@@ -148,10 +148,10 @@ class LSTM():
         data['difference'] = (data['sales'] - data['prev_sales'])
         data               = data.drop(['prev_sales'], axis=1).copy()
         lag_df             = self._lag_creation(data)
-        
+
         lag_df             = lag_df.drop(['sales', 'date'], axis=1)
         lag_df             = lag_df.values
-        
+
         lag_df             = lag_df.reshape(lag_df.shape[0], lag_df.shape[1])
         lag_df             = np.concatenate([lag_df, [[0],[0],[0],[0],[0],[0]]], axis=1)
         print(lag_df.shape)
@@ -161,7 +161,7 @@ class LSTM():
 
         return y
 
-    
+
     def _inverse_scaling(self, y_pred):
         """
         TODO: docs
