@@ -88,7 +88,7 @@ class LSTM():
         """
         try:
             data_ = json.loads(data)
-            return pd.DataFrame(data_['data']), data_['data'][0]['date']
+            return pd.DataFrame(data_['data']), data_['data'][len(data_['data'])-1]['date']
         except Exception as parser_error:
             raise parser_error
 
@@ -99,8 +99,33 @@ class LSTM():
         param:: start:string, data:np.array
         return:: payload:list[dict{}]
         """
+        
+        date_list = start.split('-')
+        print('---------')
+        print(date_list)
+        next_six_month = []
+        for i in range(0,6):
+            if date_list[1] == '12':
+                year = int(date_list[0]) + 1
+                date_list[0] = str(year)
+                month = '01'
+                date_list[1]  = month
+            else: 
+                month = str(int(date_list[1]) + 1)
+                date_list[1]  = month
+            
+            string_date = str(date_list[0])+'-'+str(date_list[1])+'-'+str(date_list[2])
+            next_six_month.append(string_date)
+
+        print('---------')
+        print(date_list)
+        print('  ------')
+        print(next_six_month)
+        print('---------')
+        
+        
         payload = []
-        for i, field in enumerate(data):
+        for date, field in zip(next_six_month, data):
             d = {
                 'schema': {
                     'type': 'struct',
@@ -119,7 +144,7 @@ class LSTM():
                     'name':'com.github.jcustenborder.kafka.connect.model.Value'
                 },
                 'payload': {
-                    'date': str(i),
+                    'date': str(date),
                     'sales': str(field)
                 }
             }
