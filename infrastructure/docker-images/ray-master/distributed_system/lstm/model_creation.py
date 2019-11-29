@@ -113,7 +113,7 @@ class LSTM():
                             {
                                 'type': "string",
                                 'optional': False,
-                                'field': "date"
+                                'field': "sales"
                             }],
                     'optional':False,
                     'name':'com.github.jcustenborder.kafka.connect.model.Value'
