@@ -29,7 +29,7 @@ class LSTM():
         self.model  = self._load_model()
         self.scaler = self._load_scaler()
         self.start = None
-
+        self.last_sale = None
 
     def _load_model(self):
         """
@@ -64,12 +64,12 @@ class LSTM():
         return:: inversed_pred: dictonary{}
         """
         try:
-            y_data, self.start = self._decode_json_to_df(data)
+            y_data, self.start, self.last_sale = self._decode_json_to_df(data)
             y_scaled           = self._feature_scaling(self.scaler, y_data)
             y_pred             = self.model.predict(y_scaled, batch_size=1)
             print(y_pred.shape)
             y_pred             = self._inverse_scaling(y_pred)
-            back = self._encode_data_to_json(self.start, y_pred)
+            back = self._encode_data_to_json(self.start, y_pred, self.last_sale)
 
             return back
         except Exception as prediction_error:
@@ -88,12 +88,12 @@ class LSTM():
         """
         try:
             data_ = json.loads(data)
-            return pd.DataFrame(data_['data']), data_['data'][len(data_['data'])-1]['date']
+            return pd.DataFrame(data_['data']), data_['data'][len(data_['data'])-1]['date'], data_['data'][-6:]
         except Exception as parser_error:
             raise parser_error
 
 
-    def _encode_data_to_json(self, start, data):
+    def _encode_data_to_json(self, start, data, prev_data):
         """
         this dictonary structrue is required for kafka and kafka-connect in order to save the results in the db
         param:: start:string, data:np.array
@@ -101,8 +101,7 @@ class LSTM():
         """
         
         date_list = start.split('-')
-        print('---------')
-        print(date_list)
+    
         next_six_month = []
         for i in range(0,6):
             if date_list[1] == '12':
@@ -117,15 +116,10 @@ class LSTM():
             string_date = str(date_list[0])+'-'+str(date_list[1])+'-'+str(date_list[2])
             next_six_month.append(string_date)
 
-        print('---------')
-        print(date_list)
-        print('  ------')
-        print(next_six_month)
-        print('---------')
-        
+        act_values = self._inverse_lag(prev_data)        
         
         payload = []
-        for date, field in zip(next_six_month, data):
+        for date, field in zip(next_six_month, act_values):
             d = {
                 'schema': {
                     'type': 'struct',
@@ -152,6 +146,13 @@ class LSTM():
         return payload
 
 
+    def _inverse_lag(self, sales):
+        """ """
+
+        inverse_sales = []
+        for sale, prev in zip(sales, self.last_sale): 
+            inverse_sales.append(prev['sales'] + sale['sales'])
+        return inverse_sales
 
     def _lag_creation(self, df):
         """
