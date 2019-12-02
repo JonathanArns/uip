@@ -38,6 +38,10 @@ def compute(message_queue_actor, model, input_topic, bootstrap_server):
 
 @ray.remote
 class MessageQueueActor():
+    """
+    implements a simple queue that can be accessed from every where within the cluster.
+    holds out going messages for kafka
+    """
     def __init__(self):
         self.messages = []
 
@@ -52,6 +56,9 @@ class MessageQueueActor():
 
 @ray.remote
 class ModelActor():
+    """
+    calls the prediction function of the lstm model (asynchron)
+    """
     def __init__(self, message_queue_actor, model_obj_id):
         print(type(model_obj_id))
         self.model = model_obj_id
