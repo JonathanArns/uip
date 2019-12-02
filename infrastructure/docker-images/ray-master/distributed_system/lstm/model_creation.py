@@ -99,9 +99,9 @@ class LSTM():
         param:: start:string, data:np.array
         return:: payload:list[dict{}]
         """
-        
+
         date_list = start.split('-')
-    
+
         next_six_month = []
         for i in range(0,6):
             if date_list[1] == '12':
@@ -109,15 +109,17 @@ class LSTM():
                 date_list[0] = str(year)
                 month = '01'
                 date_list[1]  = month
-            else: 
+            else:
                 month = str(int(date_list[1]) + 1)
+                if len(month) < 2:
+                    month = '0' + month
                 date_list[1]  = month
-            
+
             string_date = str(date_list[0])+'-'+str(date_list[1])+'-'+str(date_list[2])
             next_six_month.append(string_date)
 
-        act_values = self._inverse_lag(prev_data)        
-        
+        act_values = self._inverse_lag(prev_data)
+
         payload = []
         for date, field in zip(next_six_month, act_values):
             d = {
@@ -150,7 +152,7 @@ class LSTM():
         """ """
 
         inverse_sales = []
-        for sale, prev in zip(sales, self.last_sale): 
+        for sale, prev in zip(sales, self.last_sale):
             inverse_sales.append(prev['sales'] + sale['sales'])
         return inverse_sales
 
