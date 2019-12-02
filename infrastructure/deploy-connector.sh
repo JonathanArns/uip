@@ -37,9 +37,6 @@ curl -X POST http://localhost:8083/connectors -H "Content-Type: application/json
                 "topics.regex": ".*?results"
                 }
         }'
-        # "errors.tolerance": "all",
-        # "errors.deadletterqueue.topic.name": "jdbc_deadletterqueue",
-        # "errors.deadletterqueue.topic.replication.factor": "1",
 
 curl -X POST http://localhost:8083/connectors -H "Content-Type: application/json" -d '{
         "name": "transaction_data_source",

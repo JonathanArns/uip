@@ -23,7 +23,7 @@ class LSTM():
     """
     LSTM class if instanciated will be able to make predictions based on the model loaded.
     From the instance one only has to call the predict(data) function.
-    The class will then take care of any scaling shaping and inverse scaling
+    The class will then take care of any scaling, shaping and inverse scaling.
     """
     def __init__(self):
         self.model  = self._load_model()
@@ -33,7 +33,7 @@ class LSTM():
 
     def _load_model(self):
         """
-        function importing the LSTM model from an .h5 file
+        Imports LSTM model from an .h5 file.\n
         param:: -
         return:: lstm_model:keras.LSTM
         raise:: KerasError
@@ -45,9 +45,9 @@ class LSTM():
 
     def _load_scaler(self):
         """
-        function importing the min / max from an .save file
+        Imports min / max scaler from an .save file.\n
         param:: -
-        return:: scaler:sklearn.preprocessing.MinMacScaler
+        return:: sklearn.preprocessing.MinMacScaler
         raise:: sklearn.joblib.error
         """
         try:
@@ -57,11 +57,11 @@ class LSTM():
 
     def predict(self, data):
         """
-        function gets a json string with the data
-        Json will be decoded, scaled and the run through the prediction.
-        The predictions will be stacked in a dictonary pleasing the needs kafka-connect wants a schema for writing in the db
-        param:: data:json
-        return:: inversed_pred: dictonary{}
+        Data will be decoded, scaled, shaped and the run through the prediction.
+        Predictions will be returned in multiple dictionaries, containing schema and payload to conform to Kafka Connect standarts.
+        Takes 17 months of sales figures and return 6 months of predicted sales figures.\n
+        param:: data: string (json)
+        return:: list[dict{}]
         """
         try:
             y_data, self.start, self.last_sale = self._decode_json_to_df(data)
@@ -81,9 +81,9 @@ class LSTM():
 
     def _decode_json_to_df(self, data):
         """
-        in order to transform the json to a pandas Data Frame we need to load the json in a dictonary.
-        param:: data:json
-        return:: pandas.DataFrame, fist_data:string
+        Parses a json string and returns it as a pandas.DataFrame.\n
+        param:: string (json)
+        return:: pandas.DataFrame, string (latest date), string (latest sales)
         raise:: jsonLoadError, pandasDataFrameError
         """
         try:
@@ -95,9 +95,9 @@ class LSTM():
 
     def _encode_data_to_json(self, start, data, prev_data):
         """
-        this dictonary structrue is required for kafka and kafka-connect in order to save the results in the db
-        param:: start:string, data:np.array
-        return:: payload:list[dict{}]
+        Aggregates data and prev_data to get actual predicted sales figures and formats them into dictionaries to represent json.\n
+        param:: start:string, data:numpy.array, prev_data:numpy.array
+        return:: list[dict{}]
         """
 
         date_list = start.split('-')
@@ -149,8 +149,11 @@ class LSTM():
 
 
     def _inverse_lag(self, sales):
-        """ """
-
+        """
+        Reverses lags and differencing on the model output.\n
+        param:: sales:pandas.DataFrame
+        return:: list[float]
+        """
         inverse_sales = []
         for sale, prev in zip(sales, self.last_sale):
             inverse_sales.append(prev['sales'] + sale['sales'])
@@ -158,19 +161,24 @@ class LSTM():
 
     def _lag_creation(self, df):
         """
-
+        Reshapes a differenced timeseries DataFrame into two dimensions (6,11)
+        and creates 6 smaller timeseries that are shifted by one month each,
+        so that the result represents 16 differenced months or 17 months overall.\n
+        param:: df:pandas.DataFrame
+        return:: pandas.DataFrame
         """
         for inc in range(1,11):
             field_name = 'lag_' + str(inc)
             df[field_name] = df['difference'].shift(inc)
         df = df.dropna().reset_index(drop=True)
-        print(f'shape after lags: {df.shape}')
         return df
 
 
     def _feature_scaling(self, scaler, data):
         """
-        TODO: docs
+        Scales model input using Min Max algorithm.\n
+        param:: scaler:sklearn.preprocessing.MinMaxScaler, data:pandas.DataFrame
+        return:: numpy.array
         """
         data['sales']      = data['sales'].astype(float)
         data['prev_sales'] = data['sales'].shift(1)
@@ -194,7 +202,9 @@ class LSTM():
 
     def _inverse_scaling(self, y_pred):
         """
-        TODO: docs
+        Scales model output in reverse.\n
+        param:: y_pred:numpy.array
+        return:: numpy.array
         """
         tmp = []
         for i in range(0,len(y_pred)):
