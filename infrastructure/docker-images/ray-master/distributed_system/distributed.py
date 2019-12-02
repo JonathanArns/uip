@@ -5,7 +5,10 @@ from time import sleep
 
 @ray.remote
 def write_results(message_queue_actor, output_topic, bootstrap_server):
-    """create producer and poll the MessageQueueActor periodically for new messages"""
+    """
+    Periodically polls the MessageQueueActor and writes outgoing messages to Kafka.\n
+    param:: message_queue_actor:MessageQueueActor, output_topic:string, bootstrap_server:string
+    """
     producer = KafkaProducer(output_topic, bootstrap_server)
 
     while True:
@@ -17,7 +20,10 @@ def write_results(message_queue_actor, output_topic, bootstrap_server):
 
 
 def compute(message_queue_actor, model, input_topic, bootstrap_server):
-    """poll periodically, make a prediction and write the result to the message queue Actor"""
+    """
+    Creates a number of ModelActors and then periodically polls Kafka and starts a prediction for each message.\n
+    param:: message_queue_actor:MessageQueueActor, model:LSTM input_topic:string, bootstrap_server:string
+    """
     consumer = KafkaConsumer(input_topic, bootstrap_server)
     model_obj_id = ray.put(model)
     models = []
@@ -39,25 +45,38 @@ def compute(message_queue_actor, model, input_topic, bootstrap_server):
 @ray.remote
 class MessageQueueActor():
     """
-    implements a simple queue that can be accessed from every where within the cluster.
-    holds out going messages for kafka
+    Implements a simple queue that can be accessed from everywhere within the ray cluster.
+    Buffers outgoing messages to Kafka.
     """
     def __init__(self):
         self.messages = []
 
     def push(self, message):
+        """
+        Appends a message at the end of the queue.\n
+        param:: message:string
+        """
         self.messages.append(message)
 
     def next(self):
+        """
+        Removes and returns the first element in the queue.\n
+        return:: string
+        """
         return self.messages.pop(0)
 
     def hasNext(self):
+        """
+        Returns True, if a message is in the queue.\n
+        return:: bool
+        """
         return len(self.messages) > 0
 
 @ray.remote
 class ModelActor():
     """
-    calls the prediction function of the lstm model (asynchron)
+    A microservice that holds a model.
+    Creating multiple ModelActors allows for parallel predictions.
     """
     def __init__(self, message_queue_actor, model_obj_id):
         print(type(model_obj_id))
@@ -65,12 +84,20 @@ class ModelActor():
         self.message_queue = message_queue_actor
 
     def predict(self, features):
+        """
+        Calls predict on this Actor's model and writes the result to the MessageQueueActor self.message_queue.\n
+        param:: features:string (json)
+        """
         prediction = self.model.predict(features)
         print(prediction) #TODO remove
         for msg in prediction:
             self.message_queue.push.remote(json.dumps(msg))
 
 def run(model, input_topic, output_topic, bootstrap_server):
+    """
+    Starts the system.\n
+    param:: model:LSTM input_topic:string, output_topic:string, bootstrap_server:string
+    """
     ray.init()
     message_queue_actor = MessageQueueActor.remote()
     write_results.remote(message_queue_actor, output_topic, bootstrap_server)
