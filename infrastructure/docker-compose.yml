@@ -1,4 +1,4 @@
-version: '3'
+version: '3.5'
 services:
 
   zookeeper:
@@ -108,21 +108,6 @@ services:
     environment:
      - JOB_MANAGER_RPC_ADDRESS=jobmanager
 
-  ray-master:
-    build: ./docker-images/ray-master
-    container_name: ray-master
-    expose: 
-      - 3301
-    depends_on:
-      - kafka
-    
-  ray-worker_1:
-    build: ./docker-images/ray-worker
-    container_name: ray-worker
-    depends_on:
-      - kafka
-      - ray-master
-
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
@@ -145,3 +130,72 @@ services:
       - ./.docker-volumes/grafana_data:/var/lib/grafana
     depends_on:
       - "prometheus"
+
+  # ray-master:
+  #   build: ./docker-images/ray-master
+  #   container_name: ray-master
+  #   expose:
+  #     - 3301
+  #   depends_on:
+  #     - kafka
+  #
+  # ray-worker_1:
+  #   build: ./docker-images/ray-worker
+  #   container_name: ray-worker
+  #   depends_on:
+  #     - kafka
+  #     - ray-master
+
+  ray-head:
+    build: ./docker-images/ray
+    container_name: ray-head
+    shm_size: '2gb'
+    entrypoint: [ '/usr/local/bin/ray']
+    command: ['start', '--head', '--redis-port', '6379', '--redis-shard-ports','6380,6381', '--object-manager-port','12345', '--node-manager-port','12346', '--node-ip-address', 'ray-head', '--block']
+    ports:
+      - target: 6379
+        published: 6379
+        protocol: tcp
+        mode: host
+      - target: 6380
+        published: 6380
+        protocol: tcp
+        mode: host
+      - target: 6381
+        published: 6381
+        protocol: tcp
+        mode: host
+      - target: 12345
+        published: 12345
+        protocol: tcp
+        mode: host
+      - target: 12346
+        published: 12346
+        protocol: tcp
+        mode: host
+    deploy:
+      replicas: 1
+      placement:
+        constraints: [node.labels.Head == true ]
+
+  ray-worker:
+    build: ./docker-images/ray
+    container_name: ray-worker
+    shm_size: '2gb'
+    entrypoint: [ '/usr/local/bin/ray']
+    command: ['start', '--redis-address', 'ray-head:6379', '--object-manager-port', '12343', '--node-manager-port', '12347', '--block']
+    ports:
+      - target: 12343
+        published: 12343
+        protocol: tcp
+        mode: host
+      - target: 12347
+        published: 12347
+        protocol: tcp
+        mode: host
+    depends_on:
+      - "ray-head"
+    deploy:
+      mode: global
+      placement:
+        constraints: [node.labels.Head != true]

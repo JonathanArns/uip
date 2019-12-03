@@ -98,7 +98,7 @@ def run(model, input_topic, output_topic, bootstrap_server):
     Starts the system.\n
     param:: model:LSTM input_topic:string, output_topic:string, bootstrap_server:string
     """
-    ray.init('ray-head:6379')
+    ray.init()
     message_queue_actor = MessageQueueActor.remote()
     write_results.remote(message_queue_actor, output_topic, bootstrap_server)
     compute(message_queue_actor, model, input_topic, bootstrap_server)
