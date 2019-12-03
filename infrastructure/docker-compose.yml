@@ -146,6 +146,13 @@ services:
   #     - kafka
   #     - ray-master
 
+  ray-codebase:
+    build: ./docker-images/ray-codebase
+    container_name: ray-codebase
+    depends_on:
+      - ray-head
+      - ray-worker
+
   ray-head:
     build: ./docker-images/ray
     container_name: ray-head
