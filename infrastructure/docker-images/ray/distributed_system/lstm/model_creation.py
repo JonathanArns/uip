@@ -29,7 +29,7 @@ class LSTM():
         self.model  = self._load_model()
         self.scaler = self._load_scaler()
         self.start = None
-        self.last_sale = None
+        self.last_sales = None
 
     def _load_model(self):
         """
@@ -64,12 +64,11 @@ class LSTM():
         return:: list[dict{}]
         """
         try:
-            y_data, self.start, self.last_sale = self._decode_json_to_df(data)
-            y_scaled           = self._feature_scaling(self.scaler, y_data)
-            y_pred             = self.model.predict(y_scaled, batch_size=1)
-            print(y_pred.shape)
-            y_pred             = self._inverse_scaling(y_pred)
-            back = self._encode_data_to_json(self.start, y_pred, self.last_sale)
+            y_data     = self._decode_json_to_df(data)
+            y_scaled   = self._feature_scaling(self.scaler, y_data)
+            y_pred     = self.model.predict(y_scaled, batch_size=1)
+            y_pred     = self._inverse_scaling(y_pred)
+            back       = self._encode_data_to_json(self.start, y_pred, self.last_sales)
 
             return back
         except Exception as prediction_error:
@@ -87,23 +86,26 @@ class LSTM():
         raise:: jsonLoadError, pandasDataFrameError
         """
         try:
-            data_ = json.loads(data)
-            return pd.DataFrame(data_['data']), data_['data'][len(data_['data'])-1]['date'], data_['data'][-6:]
+            data_           = json.loads(data)
+            self.start      = data_['data'][len(data_['data'])-1]['date']
+            self.last_sales = [x['sales'] for x in data_['data'][-6:]]
+
+            return pd.DataFrame(data_['data'])
         except Exception as parser_error:
             raise parser_error
 
 
-    def _encode_data_to_json(self, start, data, prev_data):
+    def _encode_data_to_json(self, start, data, last_six):
         """
-        Aggregates data and prev_data to get actual predicted sales figures and formats them into dictionaries to represent json.\n
-        param:: start:string, data:numpy.array, prev_data:numpy.array
+        Aggregates data and last_six to get actual predicted sales figures and formats them into dictionaries to represent json.\n
+        param:: start:string, data:numpy.array, last_six:numpy.array
         return:: list[dict{}]
         """
 
         date_list = start.split('-')
 
         next_six_month = []
-        for i in range(0,6):
+        for _ in range(12):
             if date_list[1] == '12':
                 year = int(date_list[0]) + 1
                 date_list[0] = str(year)
@@ -118,10 +120,11 @@ class LSTM():
             string_date = str(date_list[0])+'-'+str(date_list[1])+'-'+str(date_list[2])
             next_six_month.append(string_date)
 
-        act_values = self._inverse_lag(prev_data)
+        act_values = self._inverse_lag(last_six)
+        self.last_sales += act_values
 
         payload = []
-        for date, field in zip(next_six_month, act_values):
+        for date, field in zip(next_six_month, self.last_sales):
             d = {
                 'schema': {
                     'type': 'struct',
@@ -148,15 +151,18 @@ class LSTM():
         return payload
 
 
-    def _inverse_lag(self, sales):
+    def _inverse_lag(self, diffs):
         """
         Reverses lags and differencing on the model output.\n
         param:: sales:pandas.DataFrame
         return:: list[float]
         """
         inverse_sales = []
-        for sale, prev in zip(sales, self.last_sale):
-            inverse_sales.append(prev['sales'] + sale['sales'])
+        start = self.last_sales[-1]
+        for diff in diffs:
+            pred = start + diff
+            inverse_sales.append(pred)
+            start = diff
         return inverse_sales
 
     def _lag_creation(self, df):
