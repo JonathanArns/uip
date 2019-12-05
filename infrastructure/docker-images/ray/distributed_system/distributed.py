@@ -18,7 +18,7 @@ def write_results(message_queue_actor, output_topic, bootstrap_server):
             producer._write_to_topic(data)
         sleep(1)
 
-
+@ray.remote
 def compute(message_queue_actor, model, input_topic, bootstrap_server):
     """
     Creates a number of ModelActors and then periodically polls Kafka and starts a prediction for each message.\n
@@ -101,4 +101,4 @@ def run(model, input_topic, output_topic, bootstrap_server):
     ray.init('ray-head:6379')
     message_queue_actor = MessageQueueActor.remote()
     write_results.remote(message_queue_actor, output_topic, bootstrap_server)
-    compute(message_queue_actor, model, input_topic, bootstrap_server)
+    compute.remote(message_queue_actor, model, input_topic, bootstrap_server)
