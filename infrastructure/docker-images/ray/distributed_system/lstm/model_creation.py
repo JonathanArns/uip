@@ -68,7 +68,7 @@ class LSTM():
             y_scaled   = self._feature_scaling(self.scaler, y_data)
             y_pred     = self.model.predict(y_scaled, batch_size=1)
             y_pred     = self._inverse_scaling(y_pred)
-            back       = self._encode_data_to_json(self.start, y_pred, self.last_sales)
+            back       = self._encode_data_to_json(self.start, y_pred)
 
             return back
         except Exception as prediction_error:
@@ -88,24 +88,25 @@ class LSTM():
         try:
             data_           = json.loads(data)
             self.start      = data_['data'][len(data_['data'])-1]['date']
-            self.last_sales = [x['sales'] for x in data_['data'][-6:]]
+            self.last_sales = list(tuple([(x['date'],x['sales']) for x in data_['data'][-6:]]))
 
             return pd.DataFrame(data_['data'])
         except Exception as parser_error:
             raise parser_error
 
 
-    def _encode_data_to_json(self, start, data, last_six):
+    def _encode_data_to_json(self, start, data):
         """
         Aggregates data and last_six to get actual predicted sales figures and formats them into dictionaries to represent json.\n
         param:: start:string, data:numpy.array, last_six:numpy.array
         return:: list[dict{}]
         """
 
+        data      = self._inverse_lag(data)
         date_list = start.split('-')
 
         next_six_month = []
-        for _ in range(12):
+        for i in range(6):
             if date_list[1] == '12':
                 year = int(date_list[0]) + 1
                 date_list[0] = str(year)
@@ -118,13 +119,15 @@ class LSTM():
                 date_list[1]  = month
 
             string_date = str(date_list[0])+'-'+str(date_list[1])+'-'+str(date_list[2])
-            next_six_month.append(string_date)
+            next_six_month.append(
+                                    (string_date, data[i])  
+                                )
 
-        act_values = self._inverse_lag(last_six)
-        self.last_sales += act_values
+        
+        self.last_sales += data
 
         payload = []
-        for date, field in zip(next_six_month, self.last_sales):
+        for date_and_field in self.last_sales:
             d = {
                 'schema': {
                     'type': 'struct',
@@ -143,8 +146,8 @@ class LSTM():
                     'name':'com.github.jcustenborder.kafka.connect.model.Value'
                 },
                 'payload': {
-                    'date': str(date),
-                    'sales': str(field)
+                    'date': str(date_and_field[0]),
+                    'sales': str(date_and_field[1])
                 }
             }
             payload.append(d)

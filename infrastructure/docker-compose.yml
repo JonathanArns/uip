@@ -131,30 +131,6 @@ services:
     depends_on:
       - "prometheus"
 
-  # ray-master:
-  #   build: ./docker-images/ray-master
-  #   container_name: ray-master
-  #   expose:
-  #     - 3301
-  #   depends_on:
-  #     - kafka
-  #
-  # ray-worker_1:
-  #   build: ./docker-images/ray-worker
-  #   container_name: ray-worker
-  #   depends_on:
-  #     - kafka
-  #     - ray-master
-
-  # ray-codebase:
-  #   build: ./docker-images/ray-codebase
-  #   container_name: ray-codebase
-  #   command: ["python", "kafka_py.py", "-in", "lstm_input", "-out", "lstm_results", "-broker", "kafka:29092"]
-  #   # command: python test_ray.py
-  #   depends_on:
-  #     - ray-head
-  #     - ray-worker
-
   ray-head:
     build: ./docker-images/ray
     container_name: ray-head
