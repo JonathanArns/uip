@@ -89,6 +89,7 @@ class LSTM():
             data_           = json.loads(data)
             self.start      = data_['data'][len(data_['data'])-1]['date']
             self.last_sales = list(tuple([(x['date'],x['sales']) for x in data_['data'][-6:]]))
+            print(self.last_sales)
 
             return pd.DataFrame(data_['data'])
         except Exception as parser_error:
@@ -124,10 +125,15 @@ class LSTM():
                                 )
 
         
-        self.last_sales += data
+        self.last_sales += next_six_month
+        print(self.last_sales)
 
         payload = []
+        print('Last Sales')
+        print(self.last_sales)
         for date_and_field in self.last_sales:
+            print('Field in Last sales')
+            print(date_and_field)
             d = {
                 'schema': {
                     'type': 'struct',
@@ -161,7 +167,7 @@ class LSTM():
         return:: list[float]
         """
         inverse_sales = []
-        start = self.last_sales[-1]
+        start = self.last_sales[-1][1]
         for diff in diffs:
             pred = start + diff
             inverse_sales.append(pred)
