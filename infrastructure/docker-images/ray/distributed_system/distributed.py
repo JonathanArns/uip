@@ -9,9 +9,9 @@ def write_results(message_queue_actor, output_topic, bootstrap_server):
     Periodically polls the MessageQueueActor and writes outgoing messages to Kafka.\n
     param:: message_queue_actor:MessageQueueActor, output_topic:string, bootstrap_server:string
     """
-    print('IN WRITE')
+
     producer = KafkaProducer(output_topic, bootstrap_server)
-    print('PRODUCER CREATED')
+
     while True:
         while ray.get(message_queue_actor.hasNext.remote()):
             data = ray.get(message_queue_actor.next.remote())
@@ -23,9 +23,7 @@ def compute(message_queue_actor, model, input_topic, bootstrap_server):
     Creates a number of ModelActors and then periodically polls Kafka and starts a prediction for each message.\n
     param:: message_queue_actor:MessageQueueActor, model:LSTM input_topic:string, bootstrap_server:string
     """
-    print('IN COMPUTE')
     consumer = KafkaConsumer(input_topic, bootstrap_server)
-    print('CONSUMER CREATED')
     model_obj_id = ray.put(model)
     models = []
     model_index = 0
@@ -98,8 +96,6 @@ def run(model, input_topic, output_topic, bootstrap_server):
     param:: model:LSTM input_topic:string, output_topic:string, bootstrap_server:string
     """
     ray.init('ray-head:6379')
-    print('RAY INIT')
     message_queue_actor = MessageQueueActor.remote()
     write_results.remote(message_queue_actor, output_topic, bootstrap_server)
-    print('Before compute')
     compute(message_queue_actor, model, input_topic, bootstrap_server)
