@@ -84,18 +84,24 @@ services:
       - ./.docker-volumes/zeppelin-conf:/opt/zeppelin/conf
 
   jobmanager:
-    image: ${FLINK_DOCKER_IMAGE_NAME:-flink}
+    # image: ${FLINK_DOCKER_IMAGE_NAME:-flink}
+    build: ./docker-images/flink
     container_name: jobmanager
     expose:
      - 6123
     ports:
      - 8081:8081
-    command: jobmanager
+    command: /bin/sh -c '/docker-entrypoint.sh jobmanager
+                        & /opt/flink/bin/flink run /opt/flink/LSTMJob.jar --input-topic lstm_input
+                        & /opt/flink/bin/flink run /opt/flink/KeyHashingJob.jar'
     environment:
      - JOB_MANAGER_RPC_ADDRESS=jobmanager
+    depends_on:
+      - kafka
 
   taskmanager:
-    image: ${FLINK_DOCKER_IMAGE_NAME:-flink}
+    # image: ${FLINK_DOCKER_IMAGE_NAME:-flink}
+    build: ./docker-images/flink
     container_name: taskmanager
     expose:
      - 6121
