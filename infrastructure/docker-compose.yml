@@ -135,8 +135,6 @@ services:
     build: ./docker-images/ray
     container_name: ray-head
     shm_size: '2gb'
-    # entrypoint: [ '/usr/local/bin/ray']
-    # command: ['start', '--head', '--redis-port', '6379', '--redis-shard-ports','6380,6381', '--object-manager-port','12345', '--node-manager-port','12346', '--node-ip-address', 'ray-head', '--block']
     command: /bin/sh -c '/usr/local/bin/ray start --head --redis-port 6379 --redis-shard-ports 6380,6381 --object-manager-port 12345 --node-manager-port 12346 --node-ip-address ray-head --block & python /usr/src/app/kafka_py.py -in lstm_input -out lstm_results -broker kafka:29092'
     ports:
       - target: 6379

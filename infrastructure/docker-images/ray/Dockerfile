@@ -18,5 +18,3 @@ COPY distributed_system ./distributed_system
 COPY requirements.txt ./
 RUN pip install -r requirements.txt
 
-
-CMD ["echo", "Base Image Ready"]
