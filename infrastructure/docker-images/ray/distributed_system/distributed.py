@@ -14,7 +14,6 @@ def write_results(message_queue_actor, output_topic, bootstrap_server):
     while True:
         while ray.get(message_queue_actor.hasNext.remote()):
             data = ray.get(message_queue_actor.next.remote())
-            print(data) #TODO remove
             producer._write_to_topic(data)
         sleep(1)
 
@@ -35,9 +34,7 @@ def compute(message_queue_actor, model, input_topic, bootstrap_server):
     while True:
         msg = consumer.poll(1.0)
 
-        if(msg == None):
-            sleep(1)
-        else:
+        if(msg != None):
             print(msg.value())
             models[model_index].predict.remote(msg.value())
             model_index = (model_index + 1) % len(models)
@@ -89,7 +86,6 @@ class ModelActor():
         param:: features:string (json)
         """
         prediction = self.model.predict(features)
-        print(prediction) #TODO remove
         for msg in prediction:
             self.message_queue.push.remote(json.dumps(msg))
 
