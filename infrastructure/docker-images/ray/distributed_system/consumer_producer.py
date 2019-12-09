@@ -1,7 +1,7 @@
 from confluent_kafka import Consumer, Producer, KafkaError
 
 
-class KafkaConsumer(Consumer):
+class KafkaConsumer:
     """
     Class Consumer inherits from confluent_kafka.Consumer. As such it acts like the super class
     TODO: write docs for no super methods
@@ -9,7 +9,7 @@ class KafkaConsumer(Consumer):
     def __init__(self, input_topic, bootstrap_server):
         self.topic = input_topic
         self.bootstrap_server = bootstrap_server
-        super().__init__(self._create_settings())
+        self.consumer = KafkaConsumer(self._create_settings())
         self.subscribe([input_topic])
 
     def _create_settings(self):
@@ -33,13 +33,13 @@ class KafkaConsumer(Consumer):
         raise: KafkaEroor if polling fails
         """
         try:
-            return self.poll(0.5)
+            return self.consumer.poll(0.5)
         except KafkaError as consumer_poll_error:
             raise  consumer_poll_error
 
 
 
-class KafkaProducer(Producer):
+class KafkaProducer:
     """
     Class Producer inherits from confluent_kafka.Producer. As such it acts like the super class
     TODO: write docs for no super methods
@@ -47,7 +47,7 @@ class KafkaProducer(Producer):
     def __init__(self, output_topic, bootstrap_server):
         self.topic            = output_topic
         self.bootstrap_server = bootstrap_server
-        super().__init__(self._create_setting())
+        self.producer = KafkaProducer(self._create_setting())
 
     def _create_setting(self):
         """
@@ -66,7 +66,7 @@ class KafkaProducer(Producer):
         raises KafkaError if messages faild to publish to topic
         """
         try:
-            self.produce(self.topic, data.encode('utf-8'))
+            self.producer.produce(self.topic, data.encode('utf-8'))
         except KafkaError as producer_write_error:
             raise producer_write_error
         finally:
