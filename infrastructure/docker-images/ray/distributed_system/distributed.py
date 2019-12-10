@@ -32,7 +32,7 @@ def compute(message_queue_actor, model, input_topic, bootstrap_server):
         models.append(modelActor)
 
     while True:
-        msg = consumer.poll(1.0)
+        msg = consumer._poll_messages()
 
         if(msg != None):
             models[model_index].predict.remote(msg.value())

@@ -34,6 +34,7 @@ services:
     build: ./docker-images/kafka-connect
     container_name: kafka-connect
     hostname: kafka-connect
+    command: /bin/sh -c '/deploy-connectors.sh & /etc/confluent/docker/run'
     environment:
       CONNECT_BOOTSTRAP_SERVERS: kafka:29092
       CONNECT_REST_ADVERTISED_HOST_NAME: connect
@@ -163,6 +164,8 @@ services:
         published: 12346
         protocol: tcp
         mode: host
+    depends_on:
+      - kafka
     deploy:
       replicas: 1
       placement:

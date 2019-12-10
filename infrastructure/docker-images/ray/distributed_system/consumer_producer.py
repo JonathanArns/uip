@@ -9,8 +9,8 @@ class KafkaConsumer():
     def __init__(self, input_topic, bootstrap_server):
         self.topic = input_topic
         self.bootstrap_server = bootstrap_server
-        self.consumer = KafkaConsumer(self._create_settings())
-        self.subscribe([input_topic])
+        self.consumer = Consumer(self._create_settings())
+        self.consumer.subscribe([input_topic])
 
     def _create_settings(self):
         """
@@ -47,7 +47,7 @@ class KafkaProducer():
     def __init__(self, output_topic, bootstrap_server):
         self.topic            = output_topic
         self.bootstrap_server = bootstrap_server
-        self.producer = KafkaProducer(self._create_setting())
+        self.producer = Producer(self._create_setting())
 
     def _create_setting(self):
         """
@@ -71,4 +71,3 @@ class KafkaProducer():
             raise producer_write_error
         finally:
             self.flush()
-
