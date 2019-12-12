@@ -1,7 +1,27 @@
+import abc
+
+
+class WrapperConsumer(abc.ABC):
+    
+    @abc.abstractmethod
+    def _poll_messages(self):
+        pass
+    
+
+
+class WrapperProducer(abc.ABC):        
+    
+    @abc.abstractmethod
+    def _write_to_topic(self, data):
+        pass
+
+        
+
+
+
 from confluent_kafka import Consumer, Producer, KafkaError
 
-
-class KafkaConsumer():
+class KafkaConsumer(WrapperConsumer):
     """
     Class Consumer inherits from confluent_kafka.Consumer. As such it acts like the super class
     TODO: write docs for no super methods
@@ -39,7 +59,7 @@ class KafkaConsumer():
 
 
 
-class KafkaProducer():
+class KafkaProducer(WrapperProducer):  
     """
     Class Producer inherits from confluent_kafka.Producer. As such it acts like the super class
     TODO: write docs for no super methods
@@ -70,4 +90,7 @@ class KafkaProducer():
         except KafkaError as producer_write_error:
             raise producer_write_error
         finally:
-            self.flush()
+            self.producer.flush()
+
+
+

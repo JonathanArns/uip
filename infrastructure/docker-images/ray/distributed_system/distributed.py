@@ -24,6 +24,7 @@ def compute(message_queue_actor, model, input_topic, bootstrap_server):
     param:: message_queue_actor:MessageQueueActor, model:LSTM input_topic:string, bootstrap_server:string
     """
     consumer = KafkaConsumer(input_topic, bootstrap_server)
+
     model_obj_id = ray.put(model)
     models = []
     model_index = 0
