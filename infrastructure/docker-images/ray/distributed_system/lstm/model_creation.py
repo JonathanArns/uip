@@ -3,6 +3,7 @@ import numpy as np
 import logging
 import json
 import os
+import abc
 from termcolor import colored as cp
 
 """
@@ -18,8 +19,14 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.externals import joblib
 
 
+class ModelWrapper(abc.ABC):
 
-class LSTM():
+    @abc.abstractmethod
+    def predict(self, data):
+        pass
+
+
+class LSTM(ModelWrapper):
     """
     LSTM class if instanciated will be able to make predictions based on the model loaded.
     From the instance one only has to call the predict(data) function.

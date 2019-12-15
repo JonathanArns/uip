@@ -15,7 +15,7 @@ def run(input_topic, output_topic, bootstrap_server, lstm_model):
     return:: -
     """
     distributed.run(
-            lstm_model,
+            ml_model,
             input_topic,
             output_topic,
             bootstrap_server
@@ -29,10 +29,10 @@ if __name__ == '__main__':
     parser.add_argument("-broker", "--bootstrap", type=str, help="sets the bootstrap server of the broker to connect to")
     args = parser.parse_args()
 
-    lstm_model = LSTM()
+    ml_model = LSTM()
     run(
         input_topic=args.input,
         output_topic=args.output,
         bootstrap_server=args.bootstrap,
-        lstm_model=lstm_model
+        ml_model=ml_model
         )
