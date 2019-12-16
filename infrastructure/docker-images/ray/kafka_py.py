@@ -5,7 +5,7 @@ from distributed_system import distributed
 from distributed_system.lstm.model_creation import LSTM
 
 
-def run(input_topic, output_topic, bootstrap_server, lstm_model):
+def run(input_topic, output_topic, bootstrap_server, ml_model):
     """
     this function will be called as soon as the docker container has started.
     It will call the init() function of ray in order to build a cluster for balancing the workers and actors on the distrebuted system.
