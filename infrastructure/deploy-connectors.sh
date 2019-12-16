@@ -1,4 +1,4 @@
-curl -X POST http://kafka-connect:8083/connectors -H "Content-Type: application/json" -d '{
+curl -X POST http://localhost:8083/connectors -H "Content-Type: application/json" -d '{
         "name": "postgres-data-sink",
         "config": {
                 "tasks.max": "1",
