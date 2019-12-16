@@ -9,7 +9,7 @@ services:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
     ports:
-     - 2181
+      - 2181
 
   kafka:
     build: ./docker-images/kafka
@@ -26,9 +26,9 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
-     - 9092:9092
+      - 9092:9092
     depends_on:
-     - zookeeper
+      - zookeeper
 
   kafka-connect:
     build: ./docker-images/kafka-connect
@@ -85,35 +85,33 @@ services:
       - ./.docker-volumes/zeppelin-conf:/opt/zeppelin/conf
 
   jobmanager:
-    # image: ${FLINK_DOCKER_IMAGE_NAME:-flink}
     build: ./docker-images/flink
     container_name: jobmanager
     expose:
-     - 6123
+      - 6123
     ports:
-     - 8081:8081
+      - 8081:8081
     command: /bin/sh -c '/docker-entrypoint.sh jobmanager
-                        & /opt/flink/bin/flink run /opt/flink/LSTMJob.jar --input-topic lstm_input
+                        & /opt/flink/bin/flink run /opt/flink/LSTMJob.jar --input-topic transaction_data --output-topic lstm_input
                         & /opt/flink/bin/flink run /opt/flink/KeyHashingJob.jar'
     environment:
-     - JOB_MANAGER_RPC_ADDRESS=jobmanager
+      - JOB_MANAGER_RPC_ADDRESS=jobmanager
     depends_on:
       - kafka
 
   taskmanager:
-    # image: ${FLINK_DOCKER_IMAGE_NAME:-flink}
     build: ./docker-images/flink
     container_name: taskmanager
     expose:
-     - 6121
-     - 6122
+      - 6121
+      - 6122
     depends_on:
-     - jobmanager
+      - jobmanager
     command: taskmanager
     links:
-     - jobmanager:jobmanager
+      - jobmanager:jobmanager
     environment:
-     - JOB_MANAGER_RPC_ADDRESS=jobmanager
+      - JOB_MANAGER_RPC_ADDRESS=jobmanager
 
   prometheus:
     image: prom/prometheus:latest
