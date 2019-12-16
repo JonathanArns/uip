@@ -169,7 +169,6 @@ services:
     build: ./docker-images/ray
     container_name: ray-worker
     shm_size: '2gb'
-    entrypoint: [ '/usr/local/bin/ray']
     command: /bin/sh -c 'sleep 5 ; /usr/local/bin/ray start --redis-address ray-head:6379 --object-manager-port 12343 --node-manager-port 12347 --block'
     ports:
       - target: 12343
