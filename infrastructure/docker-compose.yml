@@ -164,10 +164,6 @@ services:
         mode: host
     depends_on:
       - kafka
-    deploy:
-      replicas: 1
-      placement:
-        constraints: [node.labels.Head == true ]
 
   ray-worker:
     build: ./docker-images/ray
@@ -186,7 +182,3 @@ services:
         mode: host
     depends_on:
       - ray-head
-    deploy:
-      mode: global
-      placement:
-        constraints: [node.labels.Head != true]
