@@ -491,7 +491,7 @@
       "name": "angular",
       "group": "angular",
       "properties": {},
-      "status": "READY",
+      "status": "DOWNLOADING_DEPENDENCIES",
       "interpreterGroup": [
         {
           "name": "angular",
@@ -629,7 +629,7 @@
           "type": "number"
         }
       },
-      "status": "READY",
+      "status": "DOWNLOADING_DEPENDENCIES",
       "interpreterGroup": [
         {
           "name": "spark",
