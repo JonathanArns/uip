@@ -6,7 +6,7 @@
 **/.docker-volumes/postgres-data
 **/.docker-volumes/grafana-data/png
 **/.docker-volumes/grafana-data/plugins
-**/infrastructure/data/*
+**/infrastructure/data/**
 **/.DS_Store
 **/logs
 **/*.pyc
