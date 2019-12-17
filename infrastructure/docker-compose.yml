@@ -92,7 +92,7 @@ services:
     ports:
       - 8081:8081
     command: /bin/sh -c '/docker-entrypoint.sh jobmanager
-                        & /opt/flink/bin/flink run /opt/flink/LSTMJob.jar --input-topic transaction_data --output-topic lstm_input
+                        & /opt/flink/bin/flink run /opt/flink/LSTMJob.jar
                         & /opt/flink/bin/flink run /opt/flink/KeyHashingJob.jar'
     environment:
       - JOB_MANAGER_RPC_ADDRESS=jobmanager

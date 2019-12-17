@@ -4,6 +4,8 @@
 !gradle-wrapper.jar
 
 **/.docker-volumes/postgres-data
+**/.docker-volumes/grafana-data/png
+**/.docker-volumes/grafana-data/plugins
 **/.DS_Store
 **/logs
 **/*.pyc
