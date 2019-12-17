@@ -2,7 +2,7 @@
 **/.idea/
 **/.gradle/
 !gradle-wrapper.jar
-
+**/lstm_results.csv
 **/.docker-volumes/postgres-data
 **/.docker-volumes/grafana-data/png
 **/.docker-volumes/grafana-data/plugins
