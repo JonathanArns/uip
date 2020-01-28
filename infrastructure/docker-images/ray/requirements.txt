@@ -4,5 +4,5 @@ ray==0.7.6
 Keras==2.3.1
 pandas==0.25.2
 numpy==1.17.3
-tensorflow==1.15
+tensorflow==1.15.2
 scikit-learn==0.21.3
